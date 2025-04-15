@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from typing import List
 from fastapi import status
 
@@ -21,3 +21,10 @@ def create_book(book: BookCreate, session: SessionDep):
     session.commit()
     session.refresh(db_book)
     return db_book
+
+@router.get("/{book_id}", response_model=BookOut)
+def get_book(book_id: str, session: SessionDep):
+    book = session.query(Book).filter(Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return book
