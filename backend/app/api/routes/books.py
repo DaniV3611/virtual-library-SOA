@@ -5,6 +5,7 @@ from fastapi import status
 from app.api.dependencies.session import SessionDep
 from app.schemas.book import BookCreate, BookOut
 from app.crud.books import create_book_db, get_all_books, get_book_by_id
+from app.api.dependencies.deps import UserIsAdminDep
 
 
 router = APIRouter()
@@ -15,7 +16,7 @@ def get_books(session: SessionDep):
     return books
 
 @router.post("/", response_model=BookOut, status_code=status.HTTP_201_CREATED)
-def create_book(book: BookCreate, session: SessionDep):
+def create_book(book: BookCreate, session: SessionDep, current_user: UserIsAdminDep):
     db_book = create_book_db(session, book)
     return db_book
 
