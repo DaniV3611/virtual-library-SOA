@@ -12,6 +12,8 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as SignupImport } from './routes/signup'
+import { Route as LoginImport } from './routes/login'
+import { Route as CartImport } from './routes/cart'
 import { Route as IndexImport } from './routes/index'
 import { Route as BooksIndexImport } from './routes/books/index'
 
@@ -20,6 +22,18 @@ import { Route as BooksIndexImport } from './routes/books/index'
 const SignupRoute = SignupImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LoginRoute = LoginImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const CartRoute = CartImport.update({
+  id: '/cart',
+  path: '/cart',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -46,6 +60,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/cart': {
+      id: '/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartImport
+      parentRoute: typeof rootRoute
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginImport
+      parentRoute: typeof rootRoute
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -67,12 +95,16 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/cart': typeof CartRoute
+  '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/books': typeof BooksIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cart': typeof CartRoute
+  '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/books': typeof BooksIndexRoute
 }
@@ -80,27 +112,33 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/cart': typeof CartRoute
+  '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/books/': typeof BooksIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/signup' | '/books'
+  fullPaths: '/' | '/cart' | '/login' | '/signup' | '/books'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/signup' | '/books'
-  id: '__root__' | '/' | '/signup' | '/books/'
+  to: '/' | '/cart' | '/login' | '/signup' | '/books'
+  id: '__root__' | '/' | '/cart' | '/login' | '/signup' | '/books/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CartRoute: typeof CartRoute
+  LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
   BooksIndexRoute: typeof BooksIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CartRoute: CartRoute,
+  LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
   BooksIndexRoute: BooksIndexRoute,
 }
@@ -116,12 +154,20 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/cart",
+        "/login",
         "/signup",
         "/books/"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/cart": {
+      "filePath": "cart.tsx"
+    },
+    "/login": {
+      "filePath": "login.tsx"
     },
     "/signup": {
       "filePath": "signup.tsx"
