@@ -11,6 +11,8 @@ class BookOut(BaseModel):
     author: str
     description: str
     cover_url: Optional[str] = None
+    price: float
+    category_id: Optional[uuid.UUID] = None
 
     class Config:
         orm_mode = True

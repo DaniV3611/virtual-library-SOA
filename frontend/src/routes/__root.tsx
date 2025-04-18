@@ -6,6 +6,7 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import Header from "../components/Header";
 import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "../hooks/useAuth";
 
 export const Route = createRootRoute({
   component: () => {
@@ -17,10 +18,12 @@ export const Route = createRootRoute({
           isIndexRoute ? "" : "flex flex-col"
         }`}
       >
-        <Header />
-        <Outlet />
-        <TanStackRouterDevtools />
-        <Toaster />
+        <AuthProvider>
+          <Header />
+          <Outlet />
+          <TanStackRouterDevtools />
+          <Toaster />
+        </AuthProvider>
       </div>
     );
   },

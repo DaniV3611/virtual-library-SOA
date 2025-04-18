@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import CartIcon from "./CartIcon";
 import { Link, useRouterState } from "@tanstack/react-router";
+import HeaderButtons from "./HeaderButtons";
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -56,9 +56,7 @@ const Header = () => {
       <Link to="/">
         <h1 className="text-lg font-bold text-center">Libreria Virtual</h1>
       </Link>
-      <Link to="/cart">
-        <CartIcon />
-      </Link>
+      <HeaderButtons />
     </header>
   );
 };
