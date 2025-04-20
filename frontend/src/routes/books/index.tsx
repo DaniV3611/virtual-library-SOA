@@ -2,22 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { API_ENDPOINT } from "../../config";
 import toast from "react-hot-toast";
-
-interface Category {
-  id: number;
-  name: string;
-}
-
-interface Book {
-  id: number;
-  title: string;
-  author: string;
-  description: string;
-  price: number;
-  cover_url: string;
-  category_id: number;
-  category: string;
-}
+import { Book } from "../../types/books";
+import { Category } from "../../types/categories";
+import useCart from "../../hooks/useCart";
 
 export const Route = createFileRoute("/books/")({
   component: BooksPage,
@@ -29,10 +16,10 @@ function BooksPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | "all">(
-    "all"
-  );
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
+
+  const { cartItems, addToCart } = useCart();
 
   // Fetch categories from API
   useEffect(() => {
@@ -104,16 +91,25 @@ function BooksPage() {
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    setSelectedCategoryId(value === "all" ? "all" : parseInt(value, 10));
+    setSelectedCategoryId(value);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
-  const getCategoryNameById = (categoryId: number): string => {
+  const getCategoryNameById = (categoryId: string): string => {
     const category = categories.find((cat) => cat.id === categoryId);
     return category ? category.name : "Unknown";
+  };
+
+  const addBookToCart = async (bookId: string) => {
+    const res = await addToCart(bookId);
+    if (res) {
+      toast.success(`Book added to cart!`);
+    } else {
+      toast.error(`Failed to add book to cart.`);
+    }
   };
 
   if (loading) {
@@ -156,7 +152,7 @@ function BooksPage() {
           >
             <option value="all">All Categories</option>
             {categories.map((category) => (
-              <option key={category.id} value={category.id.toString()}>
+              <option key={category.id} value={category.id}>
                 {category.name}
               </option>
             ))}
@@ -224,14 +220,18 @@ function BooksPage() {
                   <span className="text-lg font-bold">
                     ${book.price.toFixed(2)}
                   </span>
-                  <button
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
-                    onClick={() =>
-                      toast.success(`Added ${book.title} to cart!`)
-                    }
-                  >
-                    Add to Cart
-                  </button>
+                  {cartItems.some((item) => item.book.id === book.id) ? (
+                    <p className="text-green-600 px-3 py-1 bg-green-200 rounded text-sm">
+                      Added
+                    </p>
+                  ) : (
+                    <button
+                      className="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white px-3 py-1 rounded text-sm"
+                      onClick={async () => addBookToCart(book.id)}
+                    >
+                      Add to Cart
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

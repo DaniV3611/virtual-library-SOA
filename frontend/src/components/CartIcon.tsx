@@ -18,7 +18,7 @@ const CartIcon = ({ dotVisible = false }: Props) => {
         </g>
       </svg>
       {dotVisible && (
-        <div className="absolute -top-1 -left-1 bg-red-500 rounded-full w-3 h-3 text-white text-xs flex items-center justify-center font-bold"></div>
+        <div className="absolute -top-1 -left-1 bg-red-500 rounded-full w-2 h-2 text-white text-xs flex items-center justify-center font-bold"></div>
       )}
     </div>
   );

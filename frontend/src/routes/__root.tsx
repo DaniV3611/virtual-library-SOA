@@ -7,6 +7,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import Header from "../components/Header";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "../hooks/useAuth";
+import { CartProvider } from "../hooks/useCart";
 
 export const Route = createRootRoute({
   component: () => {
@@ -19,10 +20,12 @@ export const Route = createRootRoute({
         }`}
       >
         <AuthProvider>
-          <Header />
-          <Outlet />
-          <TanStackRouterDevtools />
-          <Toaster />
+          <CartProvider>
+            <Header />
+            <Outlet />
+            <TanStackRouterDevtools />
+            <Toaster />
+          </CartProvider>
         </AuthProvider>
       </div>
     );

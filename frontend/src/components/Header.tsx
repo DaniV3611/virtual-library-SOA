@@ -45,12 +45,12 @@ const Header = () => {
 
   return (
     <header
-      className={`${isIndexRoute ? "fixed top-0 left-0" : ""} px-4 w-full h-16 flex flex-row items-center justify-between z-50 transition-all duration-500 ${
+      className={`${isIndexRoute ? "fixed top-0 left-0" : ""} p-4 w-full h-16 flex flex-row items-center justify-between z-50 transition-all duration-500 ${
         isIndexRoute
           ? isScrolled
             ? "bg-white shadow-md text-black"
             : "bg-transparent text-white"
-          : "text-black shadow-md bg-gray-50"
+          : "text-black shadow-md bg-gray-50 sticky top-0"
       }`}
     >
       <Link to="/">
