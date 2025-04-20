@@ -24,7 +24,30 @@ export const Route = createRootRoute({
             <Header />
             <Outlet />
             <TanStackRouterDevtools />
-            <Toaster />
+            <Toaster
+              position="bottom-right"
+              toastOptions={{
+                style: {
+                  background: "rgba(101, 101, 101, 0.8)",
+                  backdropFilter: "blur(8px)",
+                  color: "#fff",
+                  borderRadius: "8px",
+                  padding: "16px",
+                },
+                success: {
+                  iconTheme: {
+                    primary: "#4CAF50",
+                    secondary: "#fff",
+                  },
+                },
+                error: {
+                  iconTheme: {
+                    primary: "#f44336",
+                    secondary: "#fff",
+                  },
+                },
+              }}
+            />
           </CartProvider>
         </AuthProvider>
       </div>
