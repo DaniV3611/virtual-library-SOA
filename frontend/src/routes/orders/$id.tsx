@@ -100,6 +100,7 @@ function OrderDetails() {
   }, [id, isAuthenticated, authToken, navigate]);
 
   const handlePay = async (paymentData: any) => {
+    setIsPaying(true);
     try {
       const response = await fetch(`${API_ENDPOINT}/orders/${id}/pay`, {
         method: "POST",
@@ -141,6 +142,8 @@ function OrderDetails() {
     } catch (error) {
       console.error("Error processing payment:", error);
       throw error;
+    } finally {
+      setIsPaying(false);
     }
   };
 
