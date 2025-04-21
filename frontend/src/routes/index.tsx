@@ -1,10 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useBooks } from "../hooks/useBooks";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
 function Index() {
+  const { mostPurchased, latest, isLoading, error } = useBooks();
+
   return (
     <>
       {/* Hero Section */}
@@ -74,43 +77,88 @@ function Index() {
         </div>
       </section>
 
-      {/* Most Read Books */}
+      {/* Most Purchased Books */}
       <section className="w-full py-12 bg-gray-100">
         <div className="max-w-6xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-8 text-gray-800">
-            📈 Most read books
+            📈 Most purchased books
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {["The Little Prince", "1984", "One Hundred Years of Solitude"].map(
-              (title, idx) => (
-                <div key={idx} className="bg-white shadow rounded-lg p-4">
-                  <div className="h-40 bg-gray-200 mb-4 rounded" />
-                  <h3 className="text-xl font-semibold">{title}</h3>
-                  <p className="text-sm text-gray-500">Featured author</p>
+          {isLoading ? (
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : error ? (
+            <div className="text-red-500">{error}</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              {mostPurchased.map((book) => (
+                <div key={book.id} className="bg-white shadow rounded-lg p-4">
+                  <div className="h-40 mb-4 rounded overflow-hidden">
+                    {book.cover_url ? (
+                      <img
+                        src={book.cover_url}
+                        alt={book.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-400">No cover</span>
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="text-xl font-semibold">{book.title}</h3>
+                  <p className="text-sm text-gray-500">by {book.author}</p>
+                  <p className="text-lg font-bold mt-2">
+                    ${book.price.toFixed(2)}
+                  </p>
                 </div>
-              )
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* New Arrivals */}
+      {/* Latest Books */}
       <section className="w-full py-12 bg-white">
         <div className="max-w-6xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-8 text-gray-800">
-            🆕 New releases
+            🆕 Latest releases
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {["Sapiens", "The Shadow of the Wind", "Project Hail Mary"].map(
-              (title, idx) => (
-                <div key={idx} className="bg-gray-50 shadow-md rounded-lg p-4">
-                  <div className="h-40 bg-gray-200 mb-4 rounded" />
-                  <h3 className="text-xl font-semibold">{title}</h3>
-                  <p className="text-sm text-gray-500">New arrival</p>
+          {isLoading ? (
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : error ? (
+            <div className="text-red-500">{error}</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              {latest.map((book) => (
+                <div
+                  key={book.id}
+                  className="bg-gray-50 shadow-md rounded-lg p-4"
+                >
+                  <div className="h-40 mb-4 rounded overflow-hidden">
+                    {book.cover_url ? (
+                      <img
+                        src={book.cover_url}
+                        alt={book.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-400">No cover</span>
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="text-xl font-semibold">{book.title}</h3>
+                  <p className="text-sm text-gray-500">by {book.author}</p>
+                  <p className="text-lg font-bold mt-2">
+                    ${book.price.toFixed(2)}
+                  </p>
                 </div>
-              )
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
