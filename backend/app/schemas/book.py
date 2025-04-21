@@ -13,6 +13,7 @@ class BookOut(BaseModel):
     cover_url: Optional[str] = None
     price: float
     category_id: Optional[uuid.UUID] = None
+    file_url: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -25,3 +26,4 @@ class BookCreate(BaseModel):
     description: str
     price: float
     category_id: Optional[uuid.UUID] = None
+    file_url: Optional[str] = None

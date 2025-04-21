@@ -24,6 +24,9 @@ function Admin() {
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [formData, setFormData] = useState({
     title: "",
@@ -154,6 +157,66 @@ function Admin() {
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      toast.error("Please select a file");
+      return;
+    }
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    try {
+      const response = await fetch(`${API_ENDPOINT}/files/upload`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload file");
+      }
+
+      const data = await response.json();
+      console.log("Server response:", data); // Para debugging
+
+      // Actualizar el file_url en el formulario principal
+      let fileUrl = "";
+
+      if (data.preview_url) {
+        if (typeof data.preview_url === "string") {
+          fileUrl = data.preview_url;
+        } else if (typeof data.preview_url === "object") {
+          fileUrl =
+            data.preview_url.download_url || data.preview_url.preview_url || "";
+        }
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        file_url: fileUrl,
+      }));
+
+      toast.success("File uploaded successfully");
+      setIsUploadModalOpen(false);
+      setSelectedFile(null);
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast.error("Failed to upload file");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   if (isLoading) {
@@ -336,13 +399,22 @@ function Admin() {
                 <label className="block text-sm font-medium text-gray-700">
                   File URL
                 </label>
-                <input
-                  type="url"
-                  name="file_url"
-                  value={formData.file_url}
-                  onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                />
+                <div className="flex gap-2 mt-1">
+                  <input
+                    type="url"
+                    name="file_url"
+                    value={formData.file_url}
+                    onChange={handleChange}
+                    className="block w-full border border-gray-300 rounded-md px-3 py-2"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsUploadModalOpen(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-semibold transition duration-300 whitespace-nowrap"
+                  >
+                    Upload File
+                  </button>
+                </div>
               </div>
 
               <div className="flex justify-end gap-4 pt-4">
@@ -361,6 +433,83 @@ function Admin() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Upload File Modal */}
+      {isUploadModalOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Upload File</h2>
+              <button
+                onClick={() => {
+                  setIsUploadModalOpen(false);
+                  setSelectedFile(null);
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select a file
+                </label>
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  className="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-md file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-blue-50 file:text-blue-700
+                    hover:file:bg-blue-100"
+                />
+              </div>
+
+              {selectedFile && (
+                <div className="text-sm text-gray-600">
+                  Selected file: {selectedFile.name}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsUploadModalOpen(false);
+                    setSelectedFile(null);
+                  }}
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md font-semibold transition duration-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleUpload}
+                  disabled={!selectedFile || isUploading}
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-semibold transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isUploading ? "Uploading..." : "Upload"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

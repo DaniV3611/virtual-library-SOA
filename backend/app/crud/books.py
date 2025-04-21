@@ -2,6 +2,10 @@ from typing import List
 from app.api.dependencies.session import SessionDep
 from app.models.book import Book
 from app.schemas.book import BookCreate
+from sqlalchemy import func, desc
+
+from app.models.order import Order
+from app.models.order_item import OrderItem
 
 
 def get_all_books(session: SessionDep) -> List[Book]:
@@ -18,3 +22,57 @@ def create_book_db(session: SessionDep, book: BookCreate) -> Book:
 def get_book_by_id(session: SessionDep, book_id: str) -> Book | None:
     book = session.query(Book).filter(Book.id == book_id).first()
     return book
+
+def update_book_db(session: SessionDep, book_id: str, book_data: dict) -> Book | None:
+    book = get_book_by_id(session, book_id)
+    if not book:
+        return None
+    
+    for key, value in book_data.items():
+        setattr(book, key, value)
+    
+    session.commit()
+    session.refresh(book)
+    return book
+
+def delete_book_db(session: SessionDep, book_id: str) -> bool:
+    book = get_book_by_id(session, book_id)
+    if not book:
+        return False
+    
+    session.delete(book)
+    session.commit()
+    return True
+
+def get_most_purchased_books(session: SessionDep, limit: int = 3) -> List[Book]:
+    """
+    Get the most purchased books based on order items count
+    """
+    books = session.query(
+        Book,
+        func.count(OrderItem.id).label('purchase_count')
+    ).join(
+        OrderItem,
+        Book.id == OrderItem.book_id
+    ).join(
+        Order,
+        OrderItem.order_id == Order.id
+    ).filter(
+        Order.status == "completed"
+    ).group_by(
+        Book.id
+    ).order_by(
+        desc('purchase_count')
+    ).limit(limit).all()
+    
+    return [book[0] for book in books]
+
+def get_latest_books(session: SessionDep, limit: int = 3) -> List[Book]:
+    """
+    Get the most recently created books
+    """
+    books = session.query(Book).order_by(
+        desc(Book.created_at)
+    ).limit(limit).all()
+    
+    return books
