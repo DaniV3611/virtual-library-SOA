@@ -170,6 +170,8 @@ async def pay_order(
         "hasCvv": True
     })
 
+    # print("Token creado", token)
+
     if not token["status"]:
         raise HTTPException(status_code=422, detail="Invalid credit info")
     
@@ -184,6 +186,8 @@ async def pay_order(
         "address": data["address"],
         "cell_phone": data["cell_phone"]
     })
+
+    # print("Cliente creado", client_epayco)
 
     if not client_epayco["status"]:
         raise HTTPException(status_code=422, detail="Failed to create ePayco client")
@@ -206,6 +210,8 @@ async def pay_order(
         bill=order.id,
         client_ip=client_ip
     )
+
+    # print("Payment", payment_epayco)
 
 
     if payment_epayco["status"] and payment_epayco["success"]:

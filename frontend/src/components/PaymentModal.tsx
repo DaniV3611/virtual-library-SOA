@@ -1,9 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onPay: (paymentData: any) => void;
+  onPay: (paymentData: any) => Promise<{
+    status: string;
+    id: string;
+    user_id: string;
+    total_amount: number;
+    created_at: string;
+    items: any[];
+  }>;
   totalAmount: number;
 }
 
@@ -31,26 +39,91 @@ export default function PaymentModal({
     identification: "",
   });
 
+  const [isVisible, setIsVisible] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+      // Small delay to allow the backdrop to fade in before the modal appears
+      setTimeout(() => setIsModalVisible(true), 50);
+    } else {
+      setIsModalVisible(false);
+      // Wait for the modal to fade out before hiding the backdrop
+      setTimeout(() => setIsVisible(false), 300);
+    }
+  }, [isOpen]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onPay(formData);
+    setIsSubmitting(true);
+
+    const loadingToast = toast.loading("Processing payment...", {
+      duration: Infinity,
+    });
+
+    try {
+      const response = await onPay(formData);
+      toast.dismiss(loadingToast);
+
+      // Show message based on order status
+      if (response.status === "completed") {
+        toast.success("Payment processed successfully!");
+      } else if (response.status === "pending") {
+        toast.loading("Payment is pending confirmation...", {
+          duration: 5000,
+        });
+      } else if (response.status === "rejected") {
+        toast.error("Payment was rejected. Please try another payment method.");
+      } else if (response.status === "failed") {
+        toast.error("Payment failed. Please try again.");
+      } else {
+        toast.error("Payment could not be processed. Please try again.");
+      }
+    } catch (error: any) {
+      toast.dismiss(loadingToast);
+
+      // Handle different types of errors
+      if (error.message.includes("Invalid credit info")) {
+        toast.error("Invalid card information. Please verify your data.");
+      } else if (error.message.includes("Failed to create ePayco client")) {
+        toast.error("Error creating client. Please try again.");
+      } else if (error.message.includes("Payment failed")) {
+        toast.error("Payment could not be processed. Please try again.");
+      } else {
+        toast.error("Error processing payment. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  if (!isOpen) return null;
+  if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div
+      className={`fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity duration-300 ${
+        isVisible ? "opacity-100" : "opacity-0"
+      }`}
+    >
+      <div
+        className={`bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 ${
+          isModalVisible
+            ? "translate-y-0 opacity-100"
+            : "translate-y-4 opacity-0"
+        }`}
+      >
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Payment Information</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 transition-colors duration-200 cursor-pointer"
           >
             <svg
               className="w-6 h-6"
@@ -262,9 +335,10 @@ export default function PaymentModal({
             </div>
             <button
               type="submit"
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-semibold transition duration-300"
+              disabled={isSubmitting}
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-semibold transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Pay Now
+              {isSubmitting ? "Processing..." : "Pay Now"}
             </button>
           </div>
         </form>

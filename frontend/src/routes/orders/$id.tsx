@@ -38,6 +38,35 @@ function OrderDetails() {
   const [isPaying, setIsPaying] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "completed":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "rejected":
+        return "bg-red-100 text-red-800";
+      case "failed":
+        return "bg-red-100 text-red-800";
+      case "reversed":
+        return "bg-purple-100 text-purple-800";
+      case "retained":
+        return "bg-orange-100 text-orange-800";
+      case "started":
+        return "bg-blue-100 text-blue-800";
+      case "expired":
+        return "bg-gray-100 text-gray-800";
+      case "abandoned":
+        return "bg-gray-100 text-gray-800";
+      case "canceled":
+        return "bg-gray-100 text-gray-800";
+      case "created":
+        return "bg-blue-100 text-blue-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
   useEffect(() => {
     if (!isAuthenticated) {
       toast.error("Please log in to view your order details");
@@ -71,7 +100,6 @@ function OrderDetails() {
   }, [id, isAuthenticated, authToken, navigate]);
 
   const handlePay = async (paymentData: any) => {
-    setIsPaying(true);
     try {
       const response = await fetch(`${API_ENDPOINT}/orders/${id}/pay`, {
         method: "POST",
@@ -102,19 +130,17 @@ function OrderDetails() {
       });
 
       if (!response.ok) {
-        throw new Error("No se pudo procesar el pago");
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Failed to process payment");
       }
 
       const updatedOrder = await response.json();
       setOrder(updatedOrder);
       setIsPaymentModalOpen(false);
-
-      toast.success("Order paid successfully!");
+      return updatedOrder;
     } catch (error) {
-      console.error("Error al procesar el pago:", error);
-      toast.error("No se pudo procesar el pago");
-    } finally {
-      setIsPaying(false);
+      console.error("Error processing payment:", error);
+      throw error;
     }
   };
 
@@ -239,15 +265,38 @@ function OrderDetails() {
                   <span className="text-gray-600">Status:</span>
                   <span className="font-semibold capitalize">
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm ${
-                        order.status === "completed"
-                          ? "bg-green-100 text-green-800"
-                          : order.status === "created"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-gray-100 text-gray-800"
-                      }`}
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm ${getStatusColor(
+                        order.status
+                      )}`}
                     >
-                      {order.status}
+                      {(() => {
+                        switch (order.status) {
+                          case "pending":
+                            return "Pending";
+                          case "rejected":
+                            return "Rejected";
+                          case "failed":
+                            return "Failed";
+                          case "reversed":
+                            return "Reversed";
+                          case "retained":
+                            return "Retained";
+                          case "started":
+                            return "Started";
+                          case "expired":
+                            return "Expired";
+                          case "abandoned":
+                            return "Abandoned";
+                          case "canceled":
+                            return "Canceled";
+                          case "created":
+                            return "Created";
+                          case "completed":
+                            return "Completed";
+                          default:
+                            return order.status;
+                        }
+                      })()}
                     </span>
                   </span>
                 </div>
@@ -268,7 +317,7 @@ function OrderDetails() {
                 </div>
               </div>
 
-              {order.status === "created" && (
+              {order.status !== "completed" && (
                 <div className="border-t pt-4 mt-4">
                   <button
                     onClick={() => setIsPaymentModalOpen(true)}
@@ -277,6 +326,37 @@ function OrderDetails() {
                   >
                     {isPaying ? "Processing payment..." : "Pay Now"}
                   </button>
+                  {order.status !== "created" && (
+                    <p className="mt-2 text-sm text-gray-600">
+                      Current status:{" "}
+                      <span className="font-semibold">
+                        {(() => {
+                          switch (order.status) {
+                            case "pending":
+                              return "Pending";
+                            case "rejected":
+                              return "Rejected";
+                            case "failed":
+                              return "Failed";
+                            case "reversed":
+                              return "Reversed";
+                            case "retained":
+                              return "Retained";
+                            case "started":
+                              return "Started";
+                            case "expired":
+                              return "Expired";
+                            case "abandoned":
+                              return "Abandoned";
+                            case "canceled":
+                              return "Canceled";
+                            default:
+                              return order.status;
+                          }
+                        })()}
+                      </span>
+                    </p>
+                  )}
                 </div>
               )}
 
