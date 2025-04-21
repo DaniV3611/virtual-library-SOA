@@ -3,13 +3,14 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import useCart from "../hooks/useCart";
 import toast from "react-hot-toast";
+import { API_ENDPOINT } from "../config";
 
 export const Route = createFileRoute("/cart")({
   component: Cart,
 });
 
 function Cart() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, authToken } = useAuth();
   const { cartItems, removeFromCart, reloadCart } = useCart();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -54,17 +55,35 @@ function Cart() {
     setIsLoading(true);
     // Here you would call your API to process the purchase
 
-    // For now, just show success and clear cart
-    await reloadCart();
-    setIsLoading(false);
+    try {
+      const res = await fetch(`${API_ENDPOINT}/orders`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
 
-    if (false) {
-      toast.success(
-        "Purchase successful! Your books will be available in your library."
-      );
-    } else {
-      toast.error("Failed to complete purchase");
+      if (!res.ok) {
+        throw new Error("Failed to create order");
+      }
+
+      const order = await res.json();
+
+      setIsLoading(false);
+
+      toast.success("Order created!");
+
+      setTimeout(() => {
+        navigate({ to: `/orders/${order.id}` });
+      }, 1500);
+    } catch (error) {
+      console.error("Error processing purchase:", error);
+      toast.error("Failed to process purchase");
+      setIsLoading(false);
     }
+
+    await reloadCart();
   };
 
   return (

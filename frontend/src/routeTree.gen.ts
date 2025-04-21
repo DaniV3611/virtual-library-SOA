@@ -15,7 +15,9 @@ import { Route as SignupImport } from './routes/signup'
 import { Route as LoginImport } from './routes/login'
 import { Route as CartImport } from './routes/cart'
 import { Route as IndexImport } from './routes/index'
+import { Route as OrdersIndexImport } from './routes/orders/index'
 import { Route as BooksIndexImport } from './routes/books/index'
+import { Route as OrdersIdImport } from './routes/orders/$id'
 
 // Create/Update Routes
 
@@ -43,9 +45,21 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const OrdersIndexRoute = OrdersIndexImport.update({
+  id: '/orders/',
+  path: '/orders/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const BooksIndexRoute = BooksIndexImport.update({
   id: '/books/',
   path: '/books/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const OrdersIdRoute = OrdersIdImport.update({
+  id: '/orders/$id',
+  path: '/orders/$id',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -81,11 +95,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupImport
       parentRoute: typeof rootRoute
     }
+    '/orders/$id': {
+      id: '/orders/$id'
+      path: '/orders/$id'
+      fullPath: '/orders/$id'
+      preLoaderRoute: typeof OrdersIdImport
+      parentRoute: typeof rootRoute
+    }
     '/books/': {
       id: '/books/'
       path: '/books'
       fullPath: '/books'
       preLoaderRoute: typeof BooksIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/orders/': {
+      id: '/orders/'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof OrdersIndexImport
       parentRoute: typeof rootRoute
     }
   }
@@ -98,7 +126,9 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/orders/$id': typeof OrdersIdRoute
   '/books': typeof BooksIndexRoute
+  '/orders': typeof OrdersIndexRoute
 }
 
 export interface FileRoutesByTo {
@@ -106,7 +136,9 @@ export interface FileRoutesByTo {
   '/cart': typeof CartRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/orders/$id': typeof OrdersIdRoute
   '/books': typeof BooksIndexRoute
+  '/orders': typeof OrdersIndexRoute
 }
 
 export interface FileRoutesById {
@@ -115,15 +147,39 @@ export interface FileRoutesById {
   '/cart': typeof CartRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/orders/$id': typeof OrdersIdRoute
   '/books/': typeof BooksIndexRoute
+  '/orders/': typeof OrdersIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/cart' | '/login' | '/signup' | '/books'
+  fullPaths:
+    | '/'
+    | '/cart'
+    | '/login'
+    | '/signup'
+    | '/orders/$id'
+    | '/books'
+    | '/orders'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/cart' | '/login' | '/signup' | '/books'
-  id: '__root__' | '/' | '/cart' | '/login' | '/signup' | '/books/'
+  to:
+    | '/'
+    | '/cart'
+    | '/login'
+    | '/signup'
+    | '/orders/$id'
+    | '/books'
+    | '/orders'
+  id:
+    | '__root__'
+    | '/'
+    | '/cart'
+    | '/login'
+    | '/signup'
+    | '/orders/$id'
+    | '/books/'
+    | '/orders/'
   fileRoutesById: FileRoutesById
 }
 
@@ -132,7 +188,9 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
+  OrdersIdRoute: typeof OrdersIdRoute
   BooksIndexRoute: typeof BooksIndexRoute
+  OrdersIndexRoute: typeof OrdersIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -140,7 +198,9 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
+  OrdersIdRoute: OrdersIdRoute,
   BooksIndexRoute: BooksIndexRoute,
+  OrdersIndexRoute: OrdersIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -157,7 +217,9 @@ export const routeTree = rootRoute
         "/cart",
         "/login",
         "/signup",
-        "/books/"
+        "/orders/$id",
+        "/books/",
+        "/orders/"
       ]
     },
     "/": {
@@ -172,8 +234,14 @@ export const routeTree = rootRoute
     "/signup": {
       "filePath": "signup.tsx"
     },
+    "/orders/$id": {
+      "filePath": "orders/$id.tsx"
+    },
     "/books/": {
       "filePath": "books/index.tsx"
+    },
+    "/orders/": {
+      "filePath": "orders/index.tsx"
     }
   }
 }

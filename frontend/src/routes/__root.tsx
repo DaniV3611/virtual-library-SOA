@@ -28,7 +28,7 @@ export const Route = createRootRoute({
               position="bottom-right"
               toastOptions={{
                 style: {
-                  background: "rgba(101, 101, 101, 0.8)",
+                  background: "rgba(101, 101, 101, 0.7)",
                   backdropFilter: "blur(8px)",
                   color: "#fff",
                   borderRadius: "8px",
