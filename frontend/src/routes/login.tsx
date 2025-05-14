@@ -3,6 +3,14 @@ import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useAuth } from "../hooks/useAuth";
 
+// Sanitiza un string eliminando etiquetas HTML y caracteres peligrosos
+export function sanitizeInput(input: string): string {
+  let sanitized = input.replace(/<.*?>/g, ""); // elimina etiquetas HTML
+  sanitized = sanitized.replace(/["'`;]/g, ""); // elimina comillas y punto y coma
+  sanitized = sanitized.replace(/--/g, ""); // elimina doble guion
+  return sanitized.trim();
+}
+
 export const Route = createFileRoute("/login")({
   component: Login,
 });
@@ -25,7 +33,10 @@ function Login() {
   }, [isAuthenticated, user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: sanitizeInput(e.target.value),
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

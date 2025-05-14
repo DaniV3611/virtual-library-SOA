@@ -1,9 +1,9 @@
-
 from app.api.dependencies.session import SessionDep
 from app.models.category import Category
 from app.schemas.category import CategoryCreate
 
 def create_category_db(db: SessionDep, category: CategoryCreate) -> Category:
+    category.sanitize()  # Desinfección de entradas
     db_category = Category(**category.dict())
     db.add(db_category)
     db.commit()

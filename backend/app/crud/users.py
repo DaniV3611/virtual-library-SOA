@@ -1,4 +1,3 @@
-
 from app.api.dependencies.session import SessionDep
 from app.models.user import User
 from app.schemas.user import UserCreate
@@ -23,6 +22,7 @@ def create_user_db(session: SessionDep, user: UserCreate) -> User:
     """
     Create a new user in the database.
     """
+    user.sanitize()  # Desinfección de entradas
     password_hash = get_password_hash(user.password)  # Hash the password before storing it
     new_user = User(
         name=user.name,

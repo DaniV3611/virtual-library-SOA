@@ -3,6 +3,14 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { API_ENDPOINT } from "../config";
 
+// Sanitiza un string eliminando etiquetas HTML y caracteres peligrosos
+export function sanitizeInput(input: string): string {
+  let sanitized = input.replace(/<.*?>/g, ""); // elimina etiquetas HTML
+  sanitized = sanitized.replace(/["'`;]/g, ""); // elimina comillas y punto y coma
+  sanitized = sanitized.replace(/--/g, ""); // elimina doble guion
+  return sanitized.trim();
+}
+
 export const Route = createFileRoute("/signup")({
   component: Signup,
 });
@@ -21,7 +29,7 @@ function Signup() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData({ ...formData, [name]: sanitizeInput(value) });
 
     // Clear password error when either password field changes
     if (name === "password" || name === "confirmPassword") {

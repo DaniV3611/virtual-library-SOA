@@ -9,6 +9,7 @@ from app.api.dependencies.deps import CurrentUserDep, UserIsAdminDep
 from app.crud.users import create_user_db, get_user_by_email, get_user_by_id
 from app.config.security import create_access_token, verify_password
 from app.config.environment import JWT_EXPIRATION
+from app.utils.security_validations import contains_blacklisted, is_valid_email, is_valid_role
 
 router = APIRouter()
 
@@ -21,6 +22,18 @@ def login_for_access_token(
     """
     OAuth2 compatible login endpoint to get an access token
     """
+    if contains_blacklisted(form_data.username) or contains_blacklisted(form_data.password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Blacklisted words found",
+        )
+    
+    if not is_valid_email(form_data.username):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid email format",
+        )
+
     user = get_user_by_email(session, email=form_data.username)
     if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(
@@ -48,6 +61,22 @@ def register_user(
     """
     Register a new user
     """
+    if contains_blacklisted(user_in.email) or contains_blacklisted(user_in.password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Blacklisted words found",
+        )
+
+    if not is_valid_email(user_in.email):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid email format",
+        )
+    if not is_valid_role(user_in.role):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid role",
+        )
     user = get_user_by_email(session, email=user_in.email)
     if user:
         raise HTTPException(

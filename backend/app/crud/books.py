@@ -13,6 +13,7 @@ def get_all_books(session: SessionDep) -> List[Book]:
     return books
 
 def create_book_db(session: SessionDep, book: BookCreate) -> Book:
+    book.sanitize()  # Desinfección de entradas
     db_book = Book(**book.dict())
     session.add(db_book)
     session.commit()
@@ -24,6 +25,11 @@ def get_book_by_id(session: SessionDep, book_id: str) -> Book | None:
     return book
 
 def update_book_db(session: SessionDep, book_id: str, book_data: dict) -> Book | None:
+    # Sanitizar los campos de texto si existen
+    for key in ["title", "author", "description", "cover_url", "file_url"]:
+        if key in book_data and isinstance(book_data[key], str):
+            from app.utils.security_validations import sanitize_input
+            book_data[key] = sanitize_input(book_data[key])
     book = get_book_by_id(session, book_id)
     if not book:
         return None

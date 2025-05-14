@@ -88,6 +88,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsLoading(true);
     setError(null);
 
+    // Check if credentials have allowed length
+    if (credentials.username.length < 5 || credentials.password.length < 5) {
+      setError("Username and password must be at least 5 characters long");
+      setIsLoading(false);
+      return;
+    }
+    // Check if credentials are not too long
+    if (credentials.username.length > 20 || credentials.password.length > 20) {
+      setError("Username and password must be at most 20 characters long");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       // FormData for OAuth2 compatibility
       const formData = new URLSearchParams();

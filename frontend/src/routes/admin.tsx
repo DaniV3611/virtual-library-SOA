@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { API_ENDPOINT } from "../config";
 import toast from "react-hot-toast";
+import { sanitizeInput } from "../routes/signup";
 
 interface Book {
   id: string;
@@ -156,7 +157,7 @@ function Admin() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: sanitizeInput(value) }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
