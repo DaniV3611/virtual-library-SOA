@@ -11,7 +11,7 @@ function Index() {
   return (
     <>
       {/* Hero Section */}
-      <section className="w-full h-dvh flex flex-col items-center">
+      <section className="w-full h-3/5 flex flex-col items-center">
         <div
           className="p-2 w-full h-full flex flex-col items-center justify-center"
           style={{
