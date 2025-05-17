@@ -1,6 +1,6 @@
 import re
 
-BLACKLISTED_WORDS = ["DROP", "SELECT", "--"]
+BLACKLISTED_WORDS = ["DROP", "SELECT", "--", "'"]
 
 # Sanitiza un string eliminando caracteres peligrosos y espacios innecesarios
 def sanitize_input(input_str: str) -> str:
