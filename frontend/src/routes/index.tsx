@@ -17,10 +17,12 @@ function Index() {
     <div className="w-full min-h-dvh flex flex-col items-center">
       <HeroSection />
       <FeaturesSection />
-      <section className="w-full py-20 px-4 flex flex-col items-center justify-center gap-4">
-        <h2 className="text-2xl font-bold">Most Popular Books</h2>
-        <BooksCarousel books={mostPurchased} />
-      </section>
+      {mostPurchased.length > 0 && (
+        <section className="w-full py-20 px-4 flex flex-col items-center justify-center gap-4">
+          <h2 className="text-2xl font-bold">Most Popular Books</h2>
+          <BooksCarousel books={mostPurchased} />
+        </section>
+      )}
       <section className="w-full py-20 px-4 flex flex-col items-center justify-center gap-4">
         <h2 className="text-2xl font-bold">Latest Books</h2>
         <BooksCarousel books={latest} />
