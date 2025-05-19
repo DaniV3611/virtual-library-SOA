@@ -1,0 +1,7 @@
+rules:
+  - id: uso-inseguro-eval
+    patterns:
+      - pattern: eval($X)
+    message: "¡No uses eval! Es peligroso."
+    severity: ERROR
+    languages: [python]
