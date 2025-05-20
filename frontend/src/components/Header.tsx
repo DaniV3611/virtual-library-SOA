@@ -1,16 +1,17 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
-import useAuth from "@/hooks/useAuth";
+// import useAuth from "@/hooks/useAuth";
 import { useTheme } from "next-themes";
 
-import { FaBook, FaUser, FaMoon, FaSun } from "react-icons/fa";
+import { FaBook, FaMoon, FaSun } from "react-icons/fa";
+import HeaderButtons from "./HeaderButtons";
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const { isAuthenticated, user } = useAuth();
+  // const { isAuthenticated, user } = useAuth();
   const { theme, setTheme } = useTheme();
 
   const navigate = useNavigate();
@@ -89,7 +90,7 @@ export function Header() {
           >
             {theme === "dark" ? <FaSun /> : <FaMoon />}
           </Button>
-          {isAuthenticated && user ? (
+          {/* {isAuthenticated && user ? (
             <Button variant="outline" className="">
               <FaUser />
               <Link to="/signup">{user.name}</Link>
@@ -98,7 +99,8 @@ export function Header() {
             <Button className="">
               <Link to="/login">Login</Link>
             </Button>
-          )}
+          )} */}
+          <HeaderButtons />
         </nav>
       </div>
       {/* Mobile nav */}
