@@ -235,30 +235,17 @@ function BooksPage() {
       {filteredBooks.length > 0 ? (
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-6 mt-8">
           {filteredBooks.map((book) => (
-            // <Card key={book.id} className="w-full">
-            //   <CardHeader className="text-center">
-            //     <CardTitle className="text-center">{book.title}</CardTitle>
-            //     <CardDescription className="text-center p-2 line-clamp-2">
-            //       {book.description}
-            //     </CardDescription>
-            //   </CardHeader>
-            //   <CardContent className="flex items-center justify-center">
-            //     <img
-            //       src={book.cover_url ?? ""}
-            //       alt={book.title}
-            //       className="h-64 aspect-[2/3] object-cover rounded-md"
-            //     />
-            //   </CardContent>
-            // </Card>
             <Card
               key={book.id}
-              className="w-full pt-0 flex flex-col justify-between shadow-lg"
+              className="w-full pt-0 flex flex-col justify-between shadow-lg group"
             >
-              <img
-                src={book.cover_url ?? ""}
-                alt={book.title}
-                className="h-64 aspect-[2/3] object-cover rounded-md rounded-b-none"
-              />
+              <div className="h-64 aspect-[2/3] rounded-t-md overflow-hidden">
+                <img
+                  src={book.cover_url ?? ""}
+                  alt={book.title}
+                  className="h-full w-full aspect-[2/3] object-cover group-hover:scale-110 transition-transform"
+                />
+              </div>
               <CardHeader className="-mt-4">
                 <CardTitle className="text-lg font-bold">
                   {book.title}
@@ -295,64 +282,6 @@ function BooksPage() {
           ))}
         </div>
       ) : (
-        // <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        //   {filteredBooks.map((book) => (
-        //     <div
-        //       key={book.id}
-        //       className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition duration-300"
-        //     >
-        //       <div className="h-64 bg-gray-200 overflow-hidden">
-        //         {book.cover_url ? (
-        //           <img
-        //             src={book.cover_url}
-        //             alt={book.title}
-        //             className="w-full h-full object-cover"
-        //           />
-        //         ) : (
-        //           <div className="w-full h-full flex items-center justify-center bg-gray-200">
-        //             <span className="text-gray-400">No Cover</span>
-        //           </div>
-        //         )}
-        //       </div>
-
-        //       <div className="p-4">
-        //         <h3 className="text-lg font-semibold mb-1 truncate">
-        //           {book.title}
-        //         </h3>
-        //         <p className="text-gray-600 text-sm mb-2">by {book.author}</p>
-
-        //         {book.category_id && (
-        //           <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mb-2">
-        //             {getCategoryNameById(book.category_id)}
-        //           </span>
-        //         )}
-
-        //         <p className="text-gray-700 text-sm mb-3 line-clamp-2">
-        //           {book.description || "No description available"}
-        //         </p>
-
-        //         <div className="flex justify-between items-center">
-        //           <span className="text-lg font-bold">
-        //             ${book.price.toFixed(2)}
-        //           </span>
-        //           {cartItems.some((item) => item.book.id === book.id) ? (
-        //             <p className="text-green-600 px-3 py-1 bg-green-200 rounded text-sm">
-        //               Added
-        //             </p>
-        //           ) : (
-        //             <button
-        //               className="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white px-3 py-1 rounded text-sm"
-        //               onClick={async () => addBookToCart(book.id)}
-        //             >
-        //               Add to Cart
-        //             </button>
-        //           )}
-        //         </div>
-        //       </div>
-        //     </div>
-        //   ))}
-        // </div>
-
         <div className="text-center pt-10 flex flex-col gap-4">
           <p className="text-lg text-gray-500">
             No books found matching your criteria

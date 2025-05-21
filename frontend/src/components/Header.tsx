@@ -36,9 +36,7 @@ export function Header() {
   return (
     <header
       className={`fixed top-0 left-0 w-full z-30 transition-all duration-300 backdrop-blur-md ${
-        scrolled
-          ? "bg-inherit/70 shadow-lg dark:shadow-white/20 backdrop-blur-xl"
-          : "bg-transparent"
+        scrolled ? "bg-inherit/70 shadow-lg backdrop-blur-xl" : "bg-transparent"
       }`}
       style={{
         WebkitBackdropFilter: "blur(12px)",
@@ -88,6 +86,7 @@ export function Header() {
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="flex items-center justify-center"
           >
+            Theme
             {theme === "dark" ? <FaSun /> : <FaMoon />}
           </Button>
           {/* {isAuthenticated && user ? (
