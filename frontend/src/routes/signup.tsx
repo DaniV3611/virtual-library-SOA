@@ -1,7 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { API_ENDPOINT } from "../config";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useNavigate } from "@tanstack/react-router";
 
 // Sanitiza un string eliminando etiquetas HTML y caracteres peligrosos
 export function sanitizeInput(input: string): string {
@@ -26,6 +29,8 @@ function Signup() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [passwordError, setPasswordError] = useState("");
+
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -80,6 +85,7 @@ function Signup() {
 
       toast.success("Account created successfully 🎉");
       setFormData({ name: "", email: "", password: "", confirmPassword: "" });
+      navigate({ to: "/login" });
     } catch (err: any) {
       toast.error(err.message);
       setMessage(err.message);
@@ -89,96 +95,87 @@ function Signup() {
   };
 
   return (
-    <section className="w-full flex-1 flex items-center justify-center bg-gray-50 px-4">
+    <div className="w-full min-h-dvh flex flex-col items-center gap-4 pt-20 drop-shadow-md">
+      <h1 className="text-2xl font-bold">Create Account</h1>
       <form
         onSubmit={handleSubmit}
-        className="bg-white shadow-lg rounded-xl p-8 w-full max-w-md"
+        className="flex flex-col gap-4 w-80 max-w-full"
       >
-        <h2 className="text-2xl font-bold mb-6 text-center">Create Account</h2>
-
-        <label className="block mb-4">
+        <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">Name</span>
-          <input
+          <Input
             type="text"
             name="name"
-            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
             value={formData.name}
             placeholder="Name"
             onChange={handleChange}
             required
+            autoComplete="name"
           />
         </label>
-
-        <label className="block mb-4">
+        <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">Email</span>
-          <input
+          <Input
             type="email"
             name="email"
-            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
             value={formData.email}
             placeholder="example@email.com"
             onChange={handleChange}
             required
+            autoComplete="email"
           />
         </label>
-
-        <label className="block mb-4">
+        <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">Password</span>
-          <input
+          <Input
             type="password"
             name="password"
-            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
             value={formData.password}
+            placeholder="Password"
             onChange={handleChange}
             required
-            placeholder="Password"
             minLength={6}
+            autoComplete="new-password"
           />
         </label>
-
-        <label className="block mb-6">
+        <label className="flex flex-col gap-1">
           <span className="text-sm font-medium">Confirm Password</span>
-          <input
+          <Input
             type="password"
             name="confirmPassword"
-            className={`mt-1 block w-full border rounded-md px-3 py-2 ${
-              passwordError ? "border-red-500" : "border-gray-300"
-            }`}
             value={formData.confirmPassword}
+            placeholder="Confirm your password"
             onChange={handleChange}
             required
-            placeholder="Confirm your password"
             minLength={6}
+            autoComplete="new-password"
+            className={passwordError ? "border-red-500" : ""}
           />
           {passwordError && (
-            <p className="mt-1 text-sm text-red-600">{passwordError}</p>
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+              {passwordError}
+            </p>
           )}
         </label>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 duration-300 cursor-pointer"
-        >
-          {loading ? "Creating account..." : "Sign Up"}
-        </button>
-
         {message && (
-          <p className="mt-4 text-center text-sm text-red-600">{message}</p>
-        )}
-
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="text-blue-600 hover:text-blue-800 font-medium"
-            >
-              Log In
-            </Link>
+          <p className="text-red-600 dark:text-red-400 text-sm -mb-2 w-full text-center">
+            {message}
           </p>
-        </div>
+        )}
+        <Button type="submit" disabled={loading} className="mt-2 w-full">
+          {loading ? "Creating account..." : "Sign Up"}
+        </Button>
       </form>
-    </section>
+      <p className="-mt-4 text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center gap-1">
+        Already have an account?{" "}
+        <Button
+          variant="link"
+          className="p-0"
+          onClick={() => navigate({ to: "/login" })}
+        >
+          Log In
+        </Button>
+      </p>
+    </div>
   );
 }

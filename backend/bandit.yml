@@ -1,0 +1,7 @@
+# bandit.yml
+exclude_dirs:
+  - .venv
+  - alembic
+skips:
+  - B101 # Evitar advertencia de uso de assert
+  - B311 # Evita advertencia de random
