@@ -14,7 +14,7 @@ function Index() {
   const { mostPurchased, latest } = useBooks();
 
   return (
-    <div className="w-full min-h-dvh flex flex-col items-center">
+    <div className="w-full min-h-dvh flex flex-col items-center bg-gradient-to-r from-indigo-400 via-red-300 to-yellow-200 dark:bg-gradient-to-r dark:from-indigo-950 dark:via-red-950 dark:to-yellow-950">
       <HeroSection />
       <FeaturesSection />
       {mostPurchased.length > 0 && (
@@ -27,7 +27,6 @@ function Index() {
         <h2 className="text-2xl font-bold">Latest Books</h2>
         <BooksCarousel books={latest} />
       </section>
-      <section className="w-full min-h-dvh"></section>
     </div>
   );
 }

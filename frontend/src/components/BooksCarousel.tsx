@@ -42,7 +42,7 @@ const BooksCarousel = ({ books }: Props) => {
             key={book.id}
             className="basis-full lg:basis-1/2 xl:basis-1/3"
           >
-            <Card className="">
+            <Card className="backdrop-blur-md bg-white/60 dark:bg-black/60">
               <CardHeader>
                 <CardTitle className="text-center">{book.title}</CardTitle>
                 <CardDescription

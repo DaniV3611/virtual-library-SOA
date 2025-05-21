@@ -8,7 +8,7 @@ const FeaturesSection = () => {
     <section className="w-full py-20 flex flex-col items-center justify-center gap-4">
       <h2 className="text-2xl font-bold">Why choose our library?</h2>
       <div className="flex flex-col lg:flex-row items-center justify-center gap-4 w-full px-4">
-        <Card className="w-full max-w-md lg:w-md shadow-lg dark:shadow-white/10 hover:scale-105 transition-transform group">
+        <Card className="w-full max-w-md lg:w-md shadow-lg dark:shadow-white/10 hover:scale-105 transition-transform group backdrop-blur-md bg-white/60 dark:bg-black/60">
           <CardHeader className="flex flex-col items-center justify-center gap-2">
             <FaBolt className="text-3xl text-primary group-hover:animate-bouncing" />
             <h3 className="text-lg font-bold">Instant Access</h3>
@@ -20,7 +20,7 @@ const FeaturesSection = () => {
             </p>
           </CardContent>
         </Card>
-        <Card className="w-full max-w-md lg:w-md shadow-lg dark:shadow-white/10 hover:scale-105 transition-transform group">
+        <Card className="w-full max-w-md lg:w-md shadow-lg dark:shadow-white/10 hover:scale-105 transition-transform group backdrop-blur-md bg-white/60 dark:bg-black/60">
           <CardHeader className="flex flex-col items-center justify-center gap-2">
             <FaBookOpen className="text-3xl text-primary group-hover:animate-bouncing" />
             <h3 className="text-lg font-bold">Unlimited Collection</h3>
@@ -32,7 +32,7 @@ const FeaturesSection = () => {
             </p>
           </CardContent>
         </Card>
-        <Card className="w-full max-w-md lg:w-md shadow-lg dark:shadow-white/10 hover:scale-105 transition-transform group">
+        <Card className="w-full max-w-md lg:w-md shadow-lg dark:shadow-white/10 hover:scale-105 transition-transform group backdrop-blur-md bg-white/60 dark:bg-black/60">
           <CardHeader className="flex flex-col items-center justify-center gap-2">
             <FaCloudDownloadAlt className="text-3xl text-primary group-hover:animate-bouncing" />
             <h3 className="text-lg font-bold">Easy Downloads</h3>
