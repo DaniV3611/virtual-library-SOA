@@ -3,7 +3,6 @@ import useAuth from "../hooks/useAuth";
 import useCart from "../hooks/useCart";
 import {
   FaCaretDown,
-  FaCaretUp,
   FaShoppingCart,
   FaSignOutAlt,
   FaUser,
