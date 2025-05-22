@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import useCart from "../hooks/useCart";
@@ -16,7 +16,6 @@ function Cart() {
   const navigate = useNavigate();
 
   // Calculate derived values
-  const totalItems = cartItems.length;
   const totalPrice = cartItems.reduce(
     (total, item) => total + item.book.price,
     0
@@ -87,8 +86,46 @@ function Cart() {
   };
 
   return (
-    <div className="w-full min-h-dvh pt-20 flex flex-col items-center gap-4">
+    <div className="w-full min-h-dvh pt-20 flex flex-col items-center gap-4 bg-gradient-to-r from-indigo-400 via-red-300 to-yellow-200 dark:bg-gradient-to-r dark:from-indigo-950 dark:via-red-950 dark:to-yellow-950">
       <h1 className="text-3xl font-bold drop-shadow-md">Your Shopping Cart</h1>
+      {isLoading && !cartItems.length ? (
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      ) : cartItems.length > 0 ? (
+        <>
+          <div className="flex w-full flex-1 items-center p-4 gap-4">
+            <aside className="w-auto flex-1 h-full flex flex-col items-center gap-4">
+              {cartItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex gap-2 w-full h-64 backdrop-blur-md bg-white/30 dark:bg-black/30 p-4 rounded-md group"
+                >
+                  <div className="h-64 aspect-[2/3] -ml-4 -my-4 rounded-l-md overflow-hidden">
+                    <img
+                      src={item.book.cover_url ?? ""}
+                      alt={item.book.title}
+                      className="h-full w-full aspect-[2/3] object-cover group-hover:scale-110 transition-transform"
+                    />
+                  </div>
+                  <div className="flex-1 h-full">
+                    <h2 className="text-lg font-bold">{item.book.title}</h2>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      by {item.book.author}
+                    </p>
+                    <p className="text-lg font-bold">
+                      ${item.book.price.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </aside>
+            <aside className="backdrop-blur-md bg-white/30 dark:bg-black/30 md:w-md h-full rounded-md"></aside>
+          </div>
+        </>
+      ) : (
+        <div>
+          <h2>Cart is empty</h2>
+        </div>
+      )}
     </div>
   );
 
