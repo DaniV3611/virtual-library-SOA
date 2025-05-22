@@ -1,9 +1,11 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import useCart from "../hooks/useCart";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { API_ENDPOINT } from "../config";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/cart")({
   component: Cart,
@@ -11,12 +13,11 @@ export const Route = createFileRoute("/cart")({
 
 function Cart() {
   const { isAuthenticated, authToken } = useAuth();
-  const { cartItems, removeFromCart, reloadCart } = useCart();
+  const { cartItems, addToCart, removeFromCart, reloadCart } = useCart();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   // Calculate derived values
-  const totalItems = cartItems.length;
   const totalPrice = cartItems.reduce(
     (total, item) => total + item.book.price,
     0
@@ -39,13 +40,20 @@ function Cart() {
     );
   }
 
-  const handleRemoveFromCart = async (bookId: string) => {
+  const handleRemoveFromCart = async (cartItemId: string, bookId: string) => {
     setIsLoading(true);
-    const success = await removeFromCart(bookId);
+    const success = await removeFromCart(cartItemId);
     setIsLoading(false);
 
     if (success) {
-      toast.success("Item removed from cart");
+      toast.success(`Item removed from cart`, {
+        action: {
+          label: "Undo",
+          onClick: () => {
+            addToCart(bookId);
+          },
+        },
+      });
     } else {
       toast.error("Failed to remove item from cart");
     }
@@ -86,9 +94,76 @@ function Cart() {
     await reloadCart();
   };
 
+  // bg-gradient-to-r from-indigo-400 via-red-300 to-yellow-200 dark:bg-gradient-to-r dark:from-indigo-950 dark:via-red-950 dark:to-yellow-950
+
   return (
-    <div className="w-full min-h-dvh pt-20 flex flex-col items-center gap-4">
+    <div className="w-full min-h-dvh py-20 flex flex-col items-center gap-4">
       <h1 className="text-3xl font-bold drop-shadow-md">Your Shopping Cart</h1>
+      {isLoading && !cartItems.length ? (
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      ) : cartItems.length > 0 ? (
+        <>
+          <div className="flex flex-col lg:flex-row w-full p-4 gap-4">
+            <aside className="w-auto flex-1 h-full flex flex-col items-center gap-4">
+              {cartItems.map((item) => (
+                <Card
+                  key={item.id}
+                  className="flex flex-row gap-4 w-full h-52 backdrop-blur-md p-4 rounded-md group"
+                >
+                  <div className="h-52 aspect-[1] -ml-4 -my-4 rounded-l-md overflow-hidden">
+                    <img
+                      src={item.book.cover_url ?? ""}
+                      alt={item.book.title}
+                      className="h-full w-full aspect-[1] object-cover group-hover:scale-110 transition-transform"
+                    />
+                  </div>
+                  <div className="flex-1 h-full flex flex-col justify-between">
+                    <div className="flex flex-col gap-1">
+                      <h2 className="text-xl font-bold">{item.book.title}</h2>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 -mt-1">
+                        by {item.book.author}
+                      </p>
+                      <p className="text-gray-700 dark:text-gray-300">
+                        {item.book.description}
+                      </p>
+                    </div>
+                    <div className="flex flex-row justify-between items-center gap-4">
+                      <p className="text-lg font-bold">
+                        ${item.book.price.toFixed(2)}
+                      </p>
+                      <Button
+                        variant="destructive"
+                        onClick={() =>
+                          handleRemoveFromCart(item.id, item.book.id)
+                        }
+                        disabled={isLoading}
+                      >
+                        Remove from cart
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </aside>
+            <aside className="backdrop-blur-md bg-white/30 dark:bg-black/30 lg:w-md xl:w-xl h-full rounded-md flex flex-col items-center justify-center gap-4 lg:sticky lg:top-20">
+              <h2 className="text-2xl font-bold drop-shadow-md">
+                Order Summary
+              </h2>
+              <div className="flex flex-row gap-2">
+                <p>Subtotal ({cartItems.length} items):</p>
+                <p>${totalPrice.toFixed(2)}</p>
+              </div>
+              <Button onClick={handleBuyNow} disabled={isLoading}>
+                {isLoading ? "Processing..." : "Purchase Now"}
+              </Button>
+            </aside>
+          </div>
+        </>
+      ) : (
+        <div>
+          <h2>Cart is empty</h2>
+        </div>
+      )}
     </div>
   );
 
