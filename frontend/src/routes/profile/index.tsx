@@ -1,25 +1,30 @@
-import {
-  createFileRoute,
-  Outlet,
-  useNavigate,
-  useLocation,
-} from "@tanstack/react-router";
-import { useEffect } from "react";
-import { useAuth } from "../hooks/useAuth";
-import { toast } from "sonner";
-import { FaUser } from "react-icons/fa";
-
 import { Button } from "@/components/ui/button";
-import { FaBookOpen, FaList } from "react-icons/fa";
-import { Card } from "@/components/ui/card";
-export const Route = createFileRoute("/profile")({
-  component: Profile,
+import { API_ENDPOINT } from "@/config";
+import useAuth from "@/hooks/useAuth";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+export const Route = createFileRoute("/profile/")({
+  component: RouteComponent,
 });
 
-function Profile() {
+interface PurchasedBook {
+  id: string;
+  title: string;
+  author: string;
+  description: string;
+  cover_url: string | null;
+  file_url: string | null;
+  order_id: string;
+  purchased_at: string;
+}
+
+function RouteComponent() {
   const { isAuthenticated, authToken } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+  const [purchasedBooks, setPurchasedBooks] = useState<PurchasedBook[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -27,6 +32,30 @@ function Profile() {
       navigate({ to: "/login" });
       return;
     }
+
+    const fetchPurchasedBooks = async () => {
+      try {
+        const response = await fetch(`${API_ENDPOINT}/books/purchased`, {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch purchased books");
+        }
+
+        const data = await response.json();
+        setPurchasedBooks(data);
+      } catch (error) {
+        console.error("Error fetching purchased books:", error);
+        toast.error("Failed to load your purchased books");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPurchasedBooks();
   }, [isAuthenticated, authToken, navigate]);
 
   if (!isAuthenticated) {
@@ -34,40 +63,43 @@ function Profile() {
   }
 
   return (
-    <div className="w-full h-dvh flex flex-row items-center pt-13">
-      <aside className="w-xs h-full p-4 flex flex-col gap-2">
-        <Button
-          variant={location.pathname === "/profile" ? "secondary" : "ghost"}
-          className="w-full flex items-center justify-start gap-2"
-          onClick={() => navigate({ to: "/profile" })}
-        >
-          <FaBookOpen />
-          Books
-        </Button>
-        <Button
-          variant={
-            location.pathname === "/profile/orders" ? "secondary" : "ghost"
-          }
-          className="w-full flex items-center justify-start gap-2"
-          onClick={() => navigate({ to: "/profile/orders" })}
-        >
-          <FaList />
-          Orders
-        </Button>
-        <Button
-          variant={location.pathname === "/profile/me" ? "secondary" : "ghost"}
-          className="w-full flex items-center justify-start gap-2"
-          onClick={() => navigate({ to: "/profile/me" })}
-        >
-          <FaUser />
-          Profile
-        </Button>
-      </aside>
-      <aside className="w-full h-full p-4 pl-0">
-        <Card className="w-full h-full rounded-md overflow-y-auto p-0">
-          <Outlet />
-        </Card>
-      </aside>
+    <div className="w-full h-full p-4 flex flex-col gap-4">
+      <h1 className="text-2xl font-bold drop-shadow-md">Purchased Books</h1>
+      {isLoading ? (
+        <div className="flex justify-center my-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      ) : purchasedBooks.length === 0 ? (
+        <>
+          <p>You haven't purchased any books yet.</p>
+          <Button onClick={() => navigate({ to: "/books" })}>
+            Browse Books
+          </Button>
+        </>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {purchasedBooks.map((book) => (
+            <div
+              key={book.id}
+              className="bg-white rounded-lg shadow overflow-hidden"
+            >
+              <div className="h-48 bg-gray-200">
+                {book.cover_url ? (
+                  <img
+                    src={book.cover_url}
+                    alt={book.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span className="text-gray-400">No Cover</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 

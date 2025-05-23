@@ -145,7 +145,7 @@ function Cart() {
                 </Card>
               ))}
             </aside>
-            <aside className="backdrop-blur-md bg-white/30 dark:bg-black/30 lg:w-md xl:w-xl h-full rounded-md flex flex-col items-center justify-center gap-4 lg:sticky lg:top-20">
+            <aside className="lg:w-md xl:w-xl h-full rounded-md flex flex-col items-center justify-center gap-4 lg:sticky lg:top-20">
               <h2 className="text-2xl font-bold drop-shadow-md">
                 Order Summary
               </h2>
