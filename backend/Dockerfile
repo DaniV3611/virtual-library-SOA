@@ -5,6 +5,9 @@ WORKDIR /app
 # Instalar postgresql-client para el comando psql
 RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
 
+# Update pip version
+RUN pip install --upgrade pip
+
 # Instalar dependencias
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
