@@ -24,10 +24,10 @@ jobs:
           pip install safety bandit
 
       - name: Safety - Dependency Scan
-        run: safety check --full-report
+        run: safety scan -r requirements.txt
 
       - name: Bandit - Static Analysis
-        run: bandit -r .
+        run: bandit -r backend
 
   scan-frontend:
     runs-on: ubuntu-latest
