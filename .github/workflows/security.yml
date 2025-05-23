@@ -24,7 +24,7 @@ jobs:
           pip install safety bandit
 
       - name: Safety - Dependency Scan
-        run: safety scan -r requirements.txt --ci
+        run: safety scan -r requirements.txt --ci --no-link
         env:
           SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
 
