@@ -21,14 +21,14 @@ jobs:
         run: |
           cd backend
           pip install -r requirements.txt
-          pip install safety bandit
+          pip install pip-audit bandit
 
-      - name: Safety - Dependency Scan
-        run: safety scan -r requirements.txt --ci --no-link
-        env:
-          SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
+      - name: pip-audit - Dependency Vulnerability Scan
+        run: |
+          cd backend
+          pip-audit --requirement requirements.txt
 
-      - name: Bandit - Static Analysis
+      - name: Bandit - Static Code Analysis
         run: bandit -r backend
 
   scan-frontend:
