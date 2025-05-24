@@ -1,4 +1,8 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useNavigate,
+  useSearch,
+} from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { API_ENDPOINT } from "../../config";
 import { Book } from "../../types/books";
@@ -28,9 +32,22 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+import { z } from "zod";
 
 export const Route = createFileRoute("/books/")({
   component: BooksPage,
+  validateSearch: z.object({
+    book_id: z.string().optional(),
+  }),
 });
 
 function BooksPage() {
@@ -42,9 +59,13 @@ function BooksPage() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+
   const [selectOpen, setSelectOpen] = useState(false);
 
   const { cartItems, addToCart } = useCart();
+
+  const search = useSearch({ from: "/books/" });
 
   const navigate = useNavigate();
 
@@ -83,6 +104,12 @@ function BooksPage() {
         const data: Book[] = await response.json();
         setBooks(data);
         setFilteredBooks(data);
+
+        if (search.book_id) {
+          setSelectedBook(
+            data.find((book) => book.id === search.book_id) ?? null
+          );
+        }
       } catch (err: any) {
         setError(err.message);
         toast.error("Error loading books");
@@ -142,6 +169,20 @@ function BooksPage() {
         },
       });
     }
+  };
+
+  const getShareLink = (bookId: string) => {
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("book_id", bookId);
+      return url.toString();
+    }
+    return "";
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success("¡Enlace copiado!");
   };
 
   if (loading) {
@@ -237,7 +278,8 @@ function BooksPage() {
           {filteredBooks.map((book) => (
             <Card
               key={book.id}
-              className="w-full pt-0 flex flex-col justify-between shadow-lg group"
+              className="w-full pt-0 flex flex-col justify-between shadow-lg group cursor-pointer"
+              onClick={() => setSelectedBook(book)}
             >
               <div className="h-64 aspect-[2/3] rounded-t-md overflow-hidden">
                 <img
@@ -300,6 +342,67 @@ function BooksPage() {
       <p className="my-4 text-gray-700 dark:text-gray-300 text-sm">
         Showing {filteredBooks.length} of {books.length} books
       </p>
+      {selectedBook && (
+        <Dialog
+          open={!!selectedBook}
+          onOpenChange={() => setSelectedBook(null)}
+        >
+          <DialogContent className="z-[60]">
+            <DialogHeader>
+              <DialogTitle>
+                <span className="flex items-center justify-between mr-4">
+                  <span>{selectedBook.title}</span>
+                  {selectedBook.category_id && (
+                    <Badge>
+                      {getCategoryNameById(selectedBook.category_id)}
+                    </Badge>
+                  )}
+                </span>
+              </DialogTitle>
+              <DialogDescription>{selectedBook.description}</DialogDescription>
+              <div className="flex flex-col items-center justify-between gap-4">
+                <div className="flex-1 flex flex-col gap-2 items-center justify-end">
+                  <img
+                    src={selectedBook.cover_url ?? ""}
+                    alt={selectedBook.title}
+                    className="h-64 lg:h-96 xl:h-128 rounded-md aspect-[2/3] object-cover w-full shadow-lg"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <div className="flex flex-row items-center justify-between w-full">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      copyToClipboard(getShareLink(selectedBook.id))
+                    }
+                  >
+                    Share
+                  </Button>
+                  <div className="flex flex-row gap-2 items-center">
+                    <span className="font-bold">$ {selectedBook.price}</span>
+                    {cartItems.some(
+                      (item) => item.book.id === selectedBook.id
+                    ) ? (
+                      <Button size="sm" disabled>
+                        Added to Cart
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={() => addBookToCart(selectedBook.id)}
+                      >
+                        Add to Cart
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </DialogFooter>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

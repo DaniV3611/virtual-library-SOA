@@ -13,8 +13,10 @@ export const Route = createFileRoute("/")({
 function Index() {
   const { mostPurchased, latest } = useBooks();
 
+  // bg-gradient-to-r from-indigo-400 via-red-300 to-yellow-200 dark:bg-gradient-to-r dark:from-indigo-950 dark:via-red-950 dark:to-yellow-950
+
   return (
-    <div className="w-full min-h-dvh flex flex-col items-center bg-gradient-to-r from-indigo-400 via-red-300 to-yellow-200 dark:bg-gradient-to-r dark:from-indigo-950 dark:via-red-950 dark:to-yellow-950">
+    <div className="w-full min-h-dvh flex flex-col items-center ">
       <HeroSection />
       <FeaturesSection />
       {mostPurchased.length > 0 && (
