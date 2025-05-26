@@ -347,11 +347,11 @@ function BooksPage() {
           open={!!selectedBook}
           onOpenChange={() => setSelectedBook(null)}
         >
-          <DialogContent className="z-[60]">
+          <DialogContent className="z-[60] max-h-[90dvh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="sticky top-0 z-10">
                 <span className="flex items-center justify-between mr-4">
-                  <span>{selectedBook.title}</span>
+                  <span className="drop-shadow-lg">{selectedBook.title}</span>
                   {selectedBook.category_id && (
                     <Badge>
                       {getCategoryNameById(selectedBook.category_id)}
@@ -369,37 +369,35 @@ function BooksPage() {
                   />
                 </div>
               </div>
-              <DialogFooter>
-                <div className="flex flex-row items-center justify-between w-full">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      copyToClipboard(getShareLink(selectedBook.id))
-                    }
-                  >
-                    Share
-                  </Button>
-                  <div className="flex flex-row gap-2 items-center">
-                    <span className="font-bold">$ {selectedBook.price}</span>
-                    {cartItems.some(
-                      (item) => item.book.id === selectedBook.id
-                    ) ? (
-                      <Button size="sm" disabled>
-                        Added to Cart
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        onClick={() => addBookToCart(selectedBook.id)}
-                      >
-                        Add to Cart
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </DialogFooter>
             </DialogHeader>
+            <DialogFooter className="sticky bottom-0 z-10">
+              <div className="flex flex-row items-center justify-between w-full">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => copyToClipboard(getShareLink(selectedBook.id))}
+                >
+                  Share
+                </Button>
+                <div className="flex flex-row gap-2 items-center">
+                  <span className="font-bold">$ {selectedBook.price}</span>
+                  {cartItems.some(
+                    (item) => item.book.id === selectedBook.id
+                  ) ? (
+                    <Button size="sm" disabled>
+                      Added to Cart
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      onClick={() => addBookToCart(selectedBook.id)}
+                    >
+                      Add to Cart
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       )}
