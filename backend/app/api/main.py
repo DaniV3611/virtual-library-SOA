@@ -8,10 +8,12 @@ from app.api.routes import orders
 from app.api.routes import files
 from app.api.routes import user_hidden_books
 from app.api.routes import admin
+from app.api.routes import auth
 
 
 api_router = APIRouter()
 
+api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 api_router.include_router(users.router, prefix="/users", tags=["users"])
 api_router.include_router(books.router, prefix="/books", tags=["books"])
 api_router.include_router(categories.router, prefix="/categories", tags=["categories"])

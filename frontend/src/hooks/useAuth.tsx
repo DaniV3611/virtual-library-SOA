@@ -1,7 +1,7 @@
 import { useState, useEffect, createContext, useContext } from "react";
-import { API_ENDPOINT } from "../config";
 import { apiClient } from "../utils/apiClient";
 import { toast } from "sonner";
+import { encryptCredentials, getServerPublicKey } from "../utils/encryption";
 
 // Types
 interface User {
@@ -115,7 +115,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
-  // Login function
+  // Login function with encrypted credentials
   const login = async (credentials: LoginCredentials) => {
     setIsLoading(true);
     setError(null);
@@ -134,24 +134,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      // FormData for OAuth2 compatibility
-      const formData = new URLSearchParams();
-      formData.append("username", credentials.username);
-      formData.append("password", credentials.password);
+      // 1. Get the server's public key
+      const publicKey = await getServerPublicKey();
 
-      const response = await apiClient.fetch(`${API_ENDPOINT}/users/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: formData.toString(),
-      });
+      // 2. Encrypt the credentials
+      const encryptedCredentials = encryptCredentials(credentials, publicKey);
 
-      const data = await response.json();
+      // 3. Send encrypted credentials to the server
+      const response = await apiClient.post(
+        "/auth/login-encrypted",
+        encryptedCredentials
+      );
 
       if (!response.ok) {
-        throw new Error(data.detail || "Login failed");
+        // Handle different error status codes
+        let errorMessage = "Login failed";
+
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.detail || errorMessage;
+        } catch (jsonError) {
+          // If JSON parsing fails, use status-based message
+          if (response.status === 401) {
+            errorMessage = "Incorrect email or password";
+          } else if (response.status === 400) {
+            errorMessage = "Invalid request data";
+          } else if (response.status >= 500) {
+            errorMessage = "Server error. Please try again later.";
+          }
+        }
+
+        throw new Error(errorMessage);
       }
+
+      const data = await response.json();
 
       // Save token
       setToken(data.access_token);

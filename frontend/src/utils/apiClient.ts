@@ -32,33 +32,41 @@ export const apiClient = {
         headers,
       });
 
-      // Handle session revocation/expiration
-      if (response.status === 401) {
-        const errorData = await response.json().catch(() => ({}));
+      // Handle session revocation/expiration only for authenticated requests
+      if (response.status === 401 && token) {
+        // Clone the response to read it without consuming the original stream
+        const responseClone = response.clone();
 
-        // Check if it's a session-related error
-        if (
-          errorData.detail?.includes("Session has been revoked") ||
-          errorData.detail?.includes("expired") ||
-          errorData.detail?.includes("Could not validate credentials")
-        ) {
-          // Remove invalid token
-          removeToken();
+        try {
+          const errorData = await responseClone.json();
 
-          // Dispatch custom event to notify auth context
-          window.dispatchEvent(
-            new CustomEvent("session-revoked", {
-              detail: {
-                message: errorData.detail || "Session has been revoked",
-                reason: "session-invalid",
-              },
-            })
-          );
+          // Check if it's a session-related error
+          if (
+            errorData.detail?.includes("Session has been revoked") ||
+            errorData.detail?.includes("expired") ||
+            errorData.detail?.includes("Could not validate credentials")
+          ) {
+            // Remove invalid token
+            removeToken();
 
-          // Reload page to trigger auth check
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
+            // Dispatch custom event to notify auth context
+            window.dispatchEvent(
+              new CustomEvent("session-revoked", {
+                detail: {
+                  message: errorData.detail || "Session has been revoked",
+                  reason: "session-invalid",
+                },
+              })
+            );
+
+            // Reload page to trigger auth check
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          }
+        } catch (jsonError) {
+          // If we can't parse JSON, it's likely not a session error
+          console.warn("Could not parse 401 error response:", jsonError);
         }
       }
 

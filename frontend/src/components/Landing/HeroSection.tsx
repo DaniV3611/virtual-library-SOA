@@ -1,9 +1,6 @@
-import { Button } from "../ui/button";
-import { useNavigate } from "@tanstack/react-router";
+import LandingButtons from "./LandingButtons";
 
 const HeroSection = () => {
-  const navigate = useNavigate();
-
   //   bg-gradient-to-br from-blue-200 via-indigo-200 to-green-200 dark:bg-gradient-to-br dark:from-blue-950 dark:via-indigo-950 dark:to-green-950
 
   return (
@@ -23,12 +20,7 @@ const HeroSection = () => {
           want.
         </span>
         <div className="flex flex-row items-center justify-center gap-2 animate-fade-in animate-delay-900">
-          <Button onClick={() => navigate({ to: "/books" })}>
-            Browse Books
-          </Button>
-          <Button variant="outline" onClick={() => navigate({ to: "/login" })}>
-            Sign In
-          </Button>
+          <LandingButtons />
         </div>
       </div>
     </section>
