@@ -4,7 +4,7 @@ import {
   useSearch,
 } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { API_ENDPOINT } from "../../config";
+import { apiClient } from "@/utils/apiClient";
 import { Book } from "../../types/books";
 import { Category } from "../../types/categories";
 import useCart from "../../hooks/useCart";
@@ -73,7 +73,7 @@ function BooksPage() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(`${API_ENDPOINT}/categories`);
+        const response = await apiClient.get("/categories");
 
         if (!response.ok) {
           throw new Error("Failed to fetch categories");
@@ -95,7 +95,7 @@ function BooksPage() {
     const fetchBooks = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${API_ENDPOINT}/books`);
+        const response = await apiClient.get("/books");
 
         if (!response.ok) {
           throw new Error("Failed to fetch books");
@@ -278,7 +278,7 @@ function BooksPage() {
           {filteredBooks.map((book) => (
             <Card
               key={book.id}
-              className="w-full pt-0 flex flex-col justify-between shadow-lg group cursor-pointer"
+              className="w-full pt-0 flex flex-col justify-between shadow-lg group cursor-pointer relative"
               onClick={() => setSelectedBook(book)}
             >
               <div className="h-64 aspect-[2/3] rounded-t-md overflow-hidden">
@@ -314,7 +314,13 @@ function BooksPage() {
                       Added to Cart
                     </Button>
                   ) : (
-                    <Button size="sm" onClick={() => addBookToCart(book.id)}>
+                    <Button
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addBookToCart(book.id);
+                      }}
+                    >
                       Add to Cart
                     </Button>
                   )}
@@ -372,13 +378,17 @@ function BooksPage() {
             </DialogHeader>
             <DialogFooter className="sticky bottom-0 z-10">
               <div className="flex flex-row items-center justify-between w-full">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => copyToClipboard(getShareLink(selectedBook.id))}
-                >
-                  Share
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      copyToClipboard(getShareLink(selectedBook.id))
+                    }
+                  >
+                    Share
+                  </Button>
+                </div>
                 <div className="flex flex-row gap-2 items-center">
                   <span className="font-bold">$ {selectedBook.price}</span>
                   {cartItems.some(

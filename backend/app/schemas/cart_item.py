@@ -14,4 +14,4 @@ class CartItemOut(BaseModel):
     quantity: int = 1
 
     class Config:
-        orm_mode = True
+        from_attributes = True

@@ -1,5 +1,5 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+// import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Header } from "../components/Header";
 import { AuthProvider } from "../hooks/useAuth";
 import { CartProvider } from "../hooks/useCart";
@@ -16,7 +16,7 @@ function AppWithUserDetection() {
     <>
       <Header />
       <Outlet />
-      <TanStackRouterDevtools />
+      {/* <TanStackRouterDevtools /> */}
       <Toaster />
     </>
   );

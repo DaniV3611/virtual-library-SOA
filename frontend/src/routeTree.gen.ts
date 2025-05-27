@@ -21,6 +21,7 @@ import { Route as ProfileIndexImport } from './routes/profile/index'
 import { Route as OrdersIndexImport } from './routes/orders/index'
 import { Route as BooksIndexImport } from './routes/books/index'
 import { Route as ProfileMeImport } from './routes/profile/me'
+import { Route as ProfileHiddenBooksImport } from './routes/profile/hidden-books'
 import { Route as OrdersIdImport } from './routes/orders/$id'
 import { Route as ProfilePaymentsIndexImport } from './routes/profile/payments/index'
 import { Route as ProfileOrdersIndexImport } from './routes/profile/orders/index'
@@ -86,6 +87,12 @@ const BooksIndexRoute = BooksIndexImport.update({
 const ProfileMeRoute = ProfileMeImport.update({
   id: '/me',
   path: '/me',
+  getParentRoute: () => ProfileRoute,
+} as any)
+
+const ProfileHiddenBooksRoute = ProfileHiddenBooksImport.update({
+  id: '/hidden-books',
+  path: '/hidden-books',
   getParentRoute: () => ProfileRoute,
 } as any)
 
@@ -172,6 +179,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrdersIdImport
       parentRoute: typeof rootRoute
     }
+    '/profile/hidden-books': {
+      id: '/profile/hidden-books'
+      path: '/hidden-books'
+      fullPath: '/profile/hidden-books'
+      preLoaderRoute: typeof ProfileHiddenBooksImport
+      parentRoute: typeof ProfileImport
+    }
     '/profile/me': {
       id: '/profile/me'
       path: '/me'
@@ -234,6 +248,7 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface ProfileRouteChildren {
+  ProfileHiddenBooksRoute: typeof ProfileHiddenBooksRoute
   ProfileMeRoute: typeof ProfileMeRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
   ProfileOrdersIdRoute: typeof ProfileOrdersIdRoute
@@ -243,6 +258,7 @@ interface ProfileRouteChildren {
 }
 
 const ProfileRouteChildren: ProfileRouteChildren = {
+  ProfileHiddenBooksRoute: ProfileHiddenBooksRoute,
   ProfileMeRoute: ProfileMeRoute,
   ProfileIndexRoute: ProfileIndexRoute,
   ProfileOrdersIdRoute: ProfileOrdersIdRoute,
@@ -262,6 +278,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRouteWithChildren
   '/signup': typeof SignupRoute
   '/orders/$id': typeof OrdersIdRoute
+  '/profile/hidden-books': typeof ProfileHiddenBooksRoute
   '/profile/me': typeof ProfileMeRoute
   '/books': typeof BooksIndexRoute
   '/orders': typeof OrdersIndexRoute
@@ -279,6 +296,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/orders/$id': typeof OrdersIdRoute
+  '/profile/hidden-books': typeof ProfileHiddenBooksRoute
   '/profile/me': typeof ProfileMeRoute
   '/books': typeof BooksIndexRoute
   '/orders': typeof OrdersIndexRoute
@@ -298,6 +316,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRouteWithChildren
   '/signup': typeof SignupRoute
   '/orders/$id': typeof OrdersIdRoute
+  '/profile/hidden-books': typeof ProfileHiddenBooksRoute
   '/profile/me': typeof ProfileMeRoute
   '/books/': typeof BooksIndexRoute
   '/orders/': typeof OrdersIndexRoute
@@ -318,6 +337,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/signup'
     | '/orders/$id'
+    | '/profile/hidden-books'
     | '/profile/me'
     | '/books'
     | '/orders'
@@ -334,6 +354,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/orders/$id'
+    | '/profile/hidden-books'
     | '/profile/me'
     | '/books'
     | '/orders'
@@ -351,6 +372,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/signup'
     | '/orders/$id'
+    | '/profile/hidden-books'
     | '/profile/me'
     | '/books/'
     | '/orders/'
@@ -422,6 +444,7 @@ export const routeTree = rootRoute
     "/profile": {
       "filePath": "profile.tsx",
       "children": [
+        "/profile/hidden-books",
         "/profile/me",
         "/profile/",
         "/profile/orders/$id",
@@ -435,6 +458,10 @@ export const routeTree = rootRoute
     },
     "/orders/$id": {
       "filePath": "orders/$id.tsx"
+    },
+    "/profile/hidden-books": {
+      "filePath": "profile/hidden-books.tsx",
+      "parent": "/profile"
     },
     "/profile/me": {
       "filePath": "profile/me.tsx",

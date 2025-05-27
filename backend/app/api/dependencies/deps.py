@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
@@ -13,6 +13,9 @@ from app.api.dependencies.session import SessionDep
 
 # OAuth2 scheme for token authentication
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/users/login")
+
+# Optional OAuth2 scheme for token authentication
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/users/login", auto_error=False)
 
 
 def get_current_user(
@@ -78,6 +81,59 @@ def get_current_user(
 
 
 CurrentUserDep = Annotated[User, Depends(get_current_user)]
+
+
+def get_current_user_optional(
+    session: SessionDep, 
+    token: Optional[str] = Depends(oauth2_scheme_optional)
+) -> Optional[User]:
+    """
+    Get the current user based on JWT token, but return None if not authenticated
+    
+    Args:
+        session: Database session
+        token: JWT token from request (optional)
+        
+    Returns:
+        Current user object or None if not authenticated
+    """
+    if token is None:
+        return None
+        
+    try:
+        payload = jwt.decode(
+            token, 
+            JWT_SECRET, 
+            algorithms=["HS256"]
+        )
+        email: str = payload.get("sub")
+        if email is None:
+            return None
+        token_data = TokenPayload(sub=email)
+    except JWTError:
+        return None
+        
+    user = get_user_by_email(session, email=token_data.sub)
+    if user is None:
+        return None
+    
+    # Validate that the session is still active
+    user_session = get_user_session_by_token(session, token)
+    if user_session is None:
+        return None
+    
+    # Check if session is valid (active, not expired, not revoked)
+    if not user_session.is_valid:
+        return None
+    
+    # Update last activity for valid sessions
+    user_session.update_activity()
+    session.commit()
+        
+    return user
+
+
+OptionalCurrentUserDep = Annotated[Optional[User], Depends(get_current_user_optional)]
 
 
 def get_current_admin_user(

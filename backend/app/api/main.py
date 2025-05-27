@@ -6,6 +6,7 @@ from app.api.routes import categories
 from app.api.routes import cart
 from app.api.routes import orders
 from app.api.routes import files
+from app.api.routes import user_hidden_books
 
 
 api_router = APIRouter()
@@ -16,3 +17,4 @@ api_router.include_router(categories.router, prefix="/categories", tags=["catego
 api_router.include_router(cart.router, prefix="/cart", tags=["cart"])
 api_router.include_router(orders.router, prefix="/orders", tags=["orders"])
 api_router.include_router(files.router, prefix="/files", tags=["files"])
+api_router.include_router(user_hidden_books.router, prefix="/user-books", tags=["user-books"])
