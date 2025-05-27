@@ -1,5 +1,6 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { API_ENDPOINT } from "../config";
+import { apiClient } from "../utils/apiClient";
 import { toast } from "sonner";
 
 // Types
@@ -54,11 +55,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const token = getToken();
       if (token) {
         try {
-          const response = await fetch(`${API_ENDPOINT}/users/me`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          const response = await apiClient.get("/users/me");
 
           if (response.ok) {
             const userData = await response.json();
@@ -142,7 +139,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       formData.append("username", credentials.username);
       formData.append("password", credentials.password);
 
-      const response = await fetch(`${API_ENDPOINT}/users/login`, {
+      const response = await apiClient.fetch(`${API_ENDPOINT}/users/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -161,11 +158,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setAuthToken(data.access_token);
 
       // Get user data
-      const userResponse = await fetch(`${API_ENDPOINT}/users/me`, {
-        headers: {
-          Authorization: `Bearer ${data.access_token}`,
-        },
-      });
+      const userResponse = await apiClient.get("/users/me");
 
       if (!userResponse.ok) {
         throw new Error("Failed to get user data");

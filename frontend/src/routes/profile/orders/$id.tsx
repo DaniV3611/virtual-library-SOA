@@ -1,8 +1,8 @@
 import PaymentModal from "@/components/PaymentModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { API_ENDPOINT } from "@/config";
 import useAuth from "@/hooks/useAuth";
+import { apiClient } from "@/utils/apiClient";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { FaAngleRight } from "react-icons/fa";
@@ -79,11 +79,7 @@ function OrderDetails() {
 
     const fetchOrder = async () => {
       try {
-        const response = await fetch(`${API_ENDPOINT}/orders/${id}`, {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        });
+        const response = await apiClient.get(`/orders/${id}`);
 
         if (!response.ok) {
           throw new Error("No se pudo cargar la orden");
@@ -105,32 +101,25 @@ function OrderDetails() {
   const handlePay = async (paymentData: any) => {
     setIsPaying(true);
     try {
-      const response = await fetch(`${API_ENDPOINT}/orders/${id}/pay`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          // Credit card info
-          "card[number]": paymentData.cardNumber,
-          "card[exp_year]": paymentData.expYear,
-          "card[exp_month]": paymentData.expMonth,
-          "card[cvc]": paymentData.cvc,
-          hasCvv: true,
+      const response = await apiClient.post(`/orders/${id}/pay`, {
+        // Credit card info
+        "card[number]": paymentData.cardNumber,
+        "card[exp_year]": paymentData.expYear,
+        "card[exp_month]": paymentData.expMonth,
+        "card[cvc]": paymentData.cvc,
+        hasCvv: true,
 
-          // Client info
-          name: paymentData.name,
-          last_name: paymentData.lastName,
-          email: paymentData.email,
-          phone: paymentData.phone,
-          city: paymentData.city,
-          address: paymentData.address,
-          cell_phone: paymentData.cellPhone,
-          identification: paymentData.identification,
-          amount: order?.total_amount.toString(),
-          dues: "1",
-        }),
+        // Client info
+        name: paymentData.name,
+        last_name: paymentData.lastName,
+        email: paymentData.email,
+        phone: paymentData.phone,
+        city: paymentData.city,
+        address: paymentData.address,
+        cell_phone: paymentData.cellPhone,
+        identification: paymentData.identification,
+        amount: order?.total_amount.toString(),
+        dues: "1",
       });
 
       if (!response.ok) {

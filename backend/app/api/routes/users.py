@@ -97,6 +97,10 @@ def login_for_access_token(
         elif "ios" in user_agent_lower:
             os = "iOS"
     
+    # Revoke all existing sessions for this user before creating new one
+    # This ensures only one active session per user across all devices/browsers
+    revoke_all_user_sessions(session, user_id=user.id, except_session_id=None)
+    
     from app.schemas.user_session import UserSessionCreate
     session_data = UserSessionCreate(
         session_token=access_token,

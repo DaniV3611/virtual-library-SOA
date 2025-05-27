@@ -187,6 +187,20 @@ export const useUserSessions = () => {
     }
   }, [authToken, fetchSessions]);
 
+  // Listen for user switch events to refresh sessions
+  useEffect(() => {
+    const handleUserSwitch = () => {
+      // Reset sessions state and refetch for new user
+      setSessions([]);
+      if (authToken) {
+        fetchSessions();
+      }
+    };
+
+    window.addEventListener("user-switched", handleUserSwitch);
+    return () => window.removeEventListener("user-switched", handleUserSwitch);
+  }, [authToken, fetchSessions]);
+
   return {
     sessions,
     loading,

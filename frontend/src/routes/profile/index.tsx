@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { API_ENDPOINT } from "@/config";
 import useAuth from "@/hooks/useAuth";
+import { apiClient } from "@/utils/apiClient";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -35,11 +35,7 @@ function RouteComponent() {
 
     const fetchPurchasedBooks = async () => {
       try {
-        const response = await fetch(`${API_ENDPOINT}/books/purchased`, {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        });
+        const response = await apiClient.get("/books/purchased");
 
         if (!response.ok) {
           throw new Error("Failed to fetch purchased books");

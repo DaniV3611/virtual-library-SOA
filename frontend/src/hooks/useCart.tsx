@@ -6,7 +6,7 @@ import {
   ReactNode,
 } from "react";
 import { useAuth } from "./useAuth";
-import { API_ENDPOINT } from "../config";
+import { apiClient } from "../utils/apiClient";
 import { CartItem } from "../types/cart";
 
 // Define cart item type
@@ -31,11 +31,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const fetchCartItems = async () => {
     if (isAuthenticated && authToken) {
       try {
-        const response = await fetch(`${API_ENDPOINT}/cart`, {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        });
+        const response = await apiClient.get("/cart");
 
         if (!response.ok) {
           throw new Error("Failed to fetch cart items");
@@ -56,14 +52,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const addToCart = async (bookId: string) => {
     if (isAuthenticated && authToken) {
       try {
-        const response = await fetch(`${API_ENDPOINT}/cart`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
-          },
-          body: JSON.stringify({ book_id: bookId }),
-        });
+        const response = await apiClient.post("/cart", { book_id: bookId });
 
         if (!response.ok) {
           throw new Error("Failed to add item to cart");
@@ -82,12 +71,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const removeFromCart = async (bookId: string) => {
     if (isAuthenticated && authToken) {
       try {
-        const response = await fetch(`${API_ENDPOINT}/cart/${bookId}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        });
+        const response = await apiClient.delete(`/cart/${bookId}`);
 
         if (!response.ok) {
           throw new Error("Failed to remove item from cart");
