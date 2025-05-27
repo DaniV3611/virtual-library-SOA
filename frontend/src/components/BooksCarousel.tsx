@@ -12,16 +12,7 @@ import {
   CarouselPrevious,
 } from "./ui/carousel";
 import { Card } from "./ui/card";
-
-interface Book {
-  id: string;
-  title: string;
-  author: string;
-  description: string;
-  price: number;
-  cover_url: string | null;
-  file_url: string | null;
-}
+import { Book } from "@/types/books";
 
 interface Props {
   books: Book[];

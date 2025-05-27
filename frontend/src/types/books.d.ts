@@ -4,7 +4,8 @@ export interface Book {
   author: string;
   description: string;
   price: number;
-  cover_url: string;
+  cover_url: string | null;
+  file_url: string | null;
   category_id: string;
   category: string;
 }
