@@ -17,3 +17,5 @@ class User(Base):
 
     orders = relationship("Order", back_populates="user")
     cart_items = relationship("CartItem", back_populates="user")
+    user_sessions = relationship("UserSession", back_populates="user")
+    
