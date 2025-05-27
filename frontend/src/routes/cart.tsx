@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import useCart from "../hooks/useCart";
 import { toast } from "sonner";
-import { API_ENDPOINT } from "../config";
+import { apiClient } from "../utils/apiClient";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/cart")({
 });
 
 function Cart() {
-  const { isAuthenticated, authToken } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { cartItems, addToCart, removeFromCart, reloadCart } = useCart();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -64,13 +64,7 @@ function Cart() {
     // Here you would call your API to process the purchase
 
     try {
-      const res = await fetch(`${API_ENDPOINT}/orders`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-      });
+      const res = await apiClient.post("/orders", {});
 
       if (!res.ok) {
         throw new Error("Failed to create order");

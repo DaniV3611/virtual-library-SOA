@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { API_ENDPOINT } from "@/config";
+import { apiClient } from "@/utils/apiClient";
 import {
   Table,
   TableBody,
@@ -40,11 +40,7 @@ function RouteComponent() {
     }
 
     const fetchOrders = async () => {
-      const response = await fetch(`${API_ENDPOINT}/orders`, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      });
+      const response = await apiClient.get("/orders");
 
       if (!response.ok) {
         throw new Error("Failed to fetch orders");

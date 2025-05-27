@@ -1,12 +1,20 @@
 from datetime import timedelta
+from typing import Optional
+import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Query
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.schemas.user import Token, UserCreate, UserOut
+from app.schemas.user_session import UserSessionOut, UserSessionsResponse, UserSessionRevoke
 from app.api.dependencies.session import SessionDep
 from app.api.dependencies.deps import CurrentUserDep, UserIsAdminDep
 from app.crud.users import create_user_db, get_user_by_email, get_user_by_id
+from app.crud.user_sessions import (
+    create_user_session, get_user_sessions_by_user_id, 
+    count_user_sessions, revoke_user_session, revoke_all_user_sessions,
+    get_user_session_by_token
+)
 from app.config.security import create_access_token, verify_password
 from app.config.environment import JWT_EXPIRATION
 from app.utils.security_validations import contains_blacklisted, is_valid_email, is_valid_role
@@ -16,11 +24,12 @@ router = APIRouter()
 
 @router.post("/login", response_model=Token)
 def login_for_access_token(
+    request: Request,
     session: SessionDep,
     form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Token:
     """
-    OAuth2 compatible login endpoint to get an access token
+    OAuth2 compatible login endpoint to get an access token and create user session
     """
     if contains_blacklisted(form_data.username) or contains_blacklisted(form_data.password):
         raise HTTPException(
@@ -46,6 +55,65 @@ def login_for_access_token(
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
+    
+    # Create user session
+    user_agent = request.headers.get("user-agent", "")
+    client_ip = request.client.host if request.client else "unknown"
+    
+    # Parse user agent for device info (basic parsing)
+    device_type = "unknown"
+    browser = "unknown"
+    os = "unknown"
+    
+    if user_agent:
+        user_agent_lower = user_agent.lower()
+        # Basic device type detection
+        if "mobile" in user_agent_lower or "android" in user_agent_lower or "iphone" in user_agent_lower:
+            device_type = "mobile"
+        elif "tablet" in user_agent_lower or "ipad" in user_agent_lower:
+            device_type = "tablet"
+        else:
+            device_type = "desktop"
+        
+        # Basic browser detection
+        if "chrome" in user_agent_lower:
+            browser = "Chrome"
+        elif "firefox" in user_agent_lower:
+            browser = "Firefox"
+        elif "safari" in user_agent_lower:
+            browser = "Safari"
+        elif "edge" in user_agent_lower:
+            browser = "Edge"
+        
+        # Basic OS detection
+        if "windows" in user_agent_lower:
+            os = "Windows"
+        elif "mac" in user_agent_lower:
+            os = "macOS"
+        elif "linux" in user_agent_lower:
+            os = "Linux"
+        elif "android" in user_agent_lower:
+            os = "Android"
+        elif "ios" in user_agent_lower:
+            os = "iOS"
+    
+    # Revoke all existing sessions for this user before creating new one
+    # This ensures only one active session per user across all devices/browsers
+    revoke_all_user_sessions(session, user_id=user.id, except_session_id=None)
+    
+    from app.schemas.user_session import UserSessionCreate
+    session_data = UserSessionCreate(
+        session_token=access_token,
+        user_id=user.id,
+        device_type=device_type,
+        browser=browser,
+        os=os,
+        user_agent=user_agent,
+        ip_address=client_ip,
+        login_method="password"
+    )
+    
+    create_user_session(session, session_data)
     
     return {
         "access_token": access_token,
@@ -124,6 +192,102 @@ def get_user(
         )
     
     return user
+
+
+@router.get("/sessions", response_model=UserSessionsResponse)
+def get_user_sessions(
+    session: SessionDep,
+    current_user: CurrentUserDep,
+    active_only: Optional[bool] = Query(False, description="Filter to show only active sessions"),
+    skip: int = Query(0, ge=0, description="Number of sessions to skip"),
+    limit: int = Query(100, ge=1, le=500, description="Maximum number of sessions to return")
+) -> UserSessionsResponse:
+    """
+    Get all sessions for the current user
+    """
+    user_sessions = get_user_sessions_by_user_id(
+        session, 
+        user_id=current_user.id,
+        active_only=active_only,
+        skip=skip,
+        limit=limit
+    )
+    
+    total = count_user_sessions(session, user_id=current_user.id, active_only=active_only)
+    
+    return UserSessionsResponse(
+        sessions=user_sessions,
+        total=total
+    )
+
+
+@router.post("/sessions/revoke", response_model=dict)
+def revoke_session(
+    session_revoke: UserSessionRevoke,
+    session: SessionDep,
+    current_user: CurrentUserDep
+) -> dict:
+    """
+    Revoke a specific user session
+    """
+    # First, verify the session belongs to the current user
+    user_sessions = get_user_sessions_by_user_id(session, user_id=current_user.id)
+    session_ids = [s.id for s in user_sessions]
+    
+    if session_revoke.session_id not in session_ids:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Session not found or does not belong to current user",
+        )
+    
+    revoked_session = revoke_user_session(session, session_revoke.session_id)
+    if not revoked_session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Session not found",
+        )
+    
+    return {
+        "message": "Session revoked successfully",
+        "session_id": str(session_revoke.session_id)
+    }
+
+
+@router.post("/sessions/revoke-all", response_model=dict)
+def revoke_all_sessions(
+    session: SessionDep,
+    current_user: CurrentUserDep,
+    keep_current: Optional[bool] = Query(True, description="Keep the current session active")
+) -> dict:
+    """
+    Revoke all user sessions, optionally keeping the current session active
+    """
+    current_session_id = None
+    
+    if keep_current:
+        # Try to find the current session by token
+        # Note: This is a simplified approach. In a real implementation,
+        # you might want to pass the current token through the dependency
+        current_sessions = get_user_sessions_by_user_id(
+            session, 
+            user_id=current_user.id, 
+            active_only=True
+        )
+        # For simplicity, we'll keep the most recent session if keep_current is True
+        if current_sessions:
+            current_session_id = max(current_sessions, key=lambda x: x.last_activity).id
+    
+    revoked_count = revoke_all_user_sessions(
+        session, 
+        user_id=current_user.id, 
+        except_session_id=current_session_id if keep_current else None
+    )
+    
+    return {
+        "message": f"Successfully revoked {revoked_count} sessions",
+        "revoked_count": revoked_count,
+        "current_session_kept": keep_current and current_session_id is not None
+    }
 
 
 # @router.put("/me", response_model=UserOut)
