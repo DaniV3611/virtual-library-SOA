@@ -7,10 +7,8 @@ import {
 import { useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { toast } from "sonner";
-import { FaUser } from "react-icons/fa";
-
 import { Button } from "@/components/ui/button";
-import { FaBookOpen, FaList } from "react-icons/fa";
+import { FaBookOpen, FaList, FaCreditCard, FaUser } from "react-icons/fa";
 import { Card } from "@/components/ui/card";
 export const Route = createFileRoute("/profile")({
   component: Profile,
@@ -53,6 +51,19 @@ function Profile() {
         >
           <FaList />
           <span className="hidden lg:block">Orders</span>
+        </Button>
+        <Button
+          variant={
+            location.pathname === "/profile/payments" ||
+            location.pathname.startsWith("/profile/payments/")
+              ? "secondary"
+              : "ghost"
+          }
+          className="w-full flex items-center justify-start gap-2"
+          onClick={() => navigate({ to: "/profile/payments" })}
+        >
+          <FaCreditCard />
+          <span className="hidden lg:block">Payments</span>
         </Button>
         <Button
           variant={location.pathname === "/profile/me" ? "secondary" : "ghost"}

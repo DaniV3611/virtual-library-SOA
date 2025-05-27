@@ -16,4 +16,5 @@ class OrderDetails(BaseModel):
     total_amount: float
     status: str
     created_at: datetime
+    payment_id: str = None  # Optional payment ID for successful payments
     items: list[dict] = []

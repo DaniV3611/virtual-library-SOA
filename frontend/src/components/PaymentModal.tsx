@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { useNavigate } from "@tanstack/react-router";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface PaymentModalProps {
     user_id: string;
     total_amount: number;
     created_at: string;
+    payment_id?: string;
     items: any[];
   }>;
   totalAmount: number;
@@ -21,6 +23,7 @@ export default function PaymentModal({
   onPay,
   totalAmount,
 }: PaymentModalProps) {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     // Credit card info
     cardNumber: "",
@@ -72,32 +75,78 @@ export default function PaymentModal({
       const response = await onPay(formData);
       toast.dismiss(loadingToast);
 
-      // Show message based on order status
+      // Show enhanced notifications based on payment status
       if (response.status === "completed") {
-        toast.success("Payment processed successfully!");
+        toast.success("🎉 Payment completed successfully!", {
+          duration: 4000,
+        });
+
+        // Redirect to invoice after 2 seconds if payment_id is available
+        if (response.payment_id) {
+          setTimeout(() => {
+            navigate({ to: `/profile/payments/${response.payment_id}` });
+          }, 2000);
+
+          toast.success("Redirecting to invoice in 2 seconds...", {
+            duration: 2000,
+          });
+        }
       } else if (response.status === "pending") {
-        toast.loading("Payment is pending confirmation...", {
+        toast.loading("⏳ Payment is pending confirmation...", {
           duration: 5000,
         });
+
+        // Still redirect to invoice for pending payments
+        if (response.payment_id) {
+          setTimeout(() => {
+            navigate({ to: `/profile/payments/${response.payment_id}` });
+          }, 2000);
+
+          toast.success("Redirecting to invoice in 2 seconds...", {
+            duration: 2000,
+          });
+        }
       } else if (response.status === "rejected") {
-        toast.error("Payment was rejected. Please try another payment method.");
+        toast.error(
+          "❌ Payment was rejected. Please try another payment method.",
+          {
+            duration: 6000,
+          }
+        );
       } else if (response.status === "failed") {
-        toast.error("Payment failed. Please try again.");
+        toast.error("❌ Payment failed. Please try again.", {
+          duration: 6000,
+        });
       } else {
-        toast.error("Payment could not be processed. Please try again.");
+        toast.error("❌ Payment could not be processed. Please try again.", {
+          duration: 6000,
+        });
+      }
+
+      // Close modal after successful payment processing
+      if (response.status === "completed" || response.status === "pending") {
+        onClose();
       }
     } catch (error: any) {
       toast.dismiss(loadingToast);
 
-      // Handle different types of errors
+      // Handle different types of errors with enhanced messages
       if (error.message.includes("Invalid credit info")) {
-        toast.error("Invalid card information. Please verify your data.");
+        toast.error("💳 Invalid card information. Please verify your data.", {
+          duration: 6000,
+        });
       } else if (error.message.includes("Failed to create ePayco client")) {
-        toast.error("Error creating client. Please try again.");
+        toast.error("🔧 Error creating client. Please try again.", {
+          duration: 6000,
+        });
       } else if (error.message.includes("Payment failed")) {
-        toast.error("Payment could not be processed. Please try again.");
+        toast.error("💸 Payment could not be processed. Please try again.", {
+          duration: 6000,
+        });
       } else {
-        toast.error("Error processing payment. Please try again.");
+        toast.error("⚠️ Error processing payment. Please try again.", {
+          duration: 6000,
+        });
       }
     } finally {
       setIsSubmitting(false);
