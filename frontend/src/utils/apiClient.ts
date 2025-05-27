@@ -14,9 +14,12 @@ export const apiClient = {
   async fetch(url: string, options: RequestInit = {}) {
     const token = getToken();
 
+    // Don't set Content-Type for FormData - let browser set it automatically
+    const isFormData = options.body instanceof FormData;
+
     // Add authorization header if token exists
     const headers = {
-      "Content-Type": "application/json",
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...options.headers,
       ...(token && { Authorization: `Bearer ${token}` }),
     };

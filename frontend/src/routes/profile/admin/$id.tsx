@@ -61,7 +61,7 @@ function EditBook() {
     price: "",
     cover_url: "",
     file_url: "",
-    category_id: "",
+    category_id: null,
   });
 
   useEffect(() => {
@@ -181,6 +181,7 @@ function EditBook() {
       setFormData((prev) => ({
         ...prev,
         file_url: fileUrl,
+        category_id: formData.category_id ? formData.category_id : null,
       }));
 
       toast.success("File uploaded successfully");
@@ -385,7 +386,7 @@ function EditBook() {
               <select
                 id="category_id"
                 name="category_id"
-                value={formData.category_id}
+                value={formData.category_id || ""}
                 onChange={handleChange}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >

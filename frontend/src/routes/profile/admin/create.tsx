@@ -170,6 +170,7 @@ function CreateBook() {
       const response = await apiClient.post("/books", {
         ...formData,
         price: parseFloat(formData.price),
+        category_id: formData.category_id || null,
       });
 
       if (!response.ok) {

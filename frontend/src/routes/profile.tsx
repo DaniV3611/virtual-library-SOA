@@ -44,48 +44,58 @@ function Profile() {
   return (
     <div className="w-full h-dvh flex flex-row items-center pt-14 md:pt-13">
       <aside className="lg:w-xs h-full p-4 flex flex-col justify-between gap-2 transition-transform">
-        {user?.isAdmin && (
-          <Button
-            variant="secondary"
-            className="w-full flex items-center justify-start gap-2"
-            onClick={() => navigate({ to: "/profile/admin" })}
-          >
-            <FaUser />
-            <span className="hidden lg:block">Admin</span>
-          </Button>
-        )}
         <div className="flex flex-col gap-2">
-          <Button
-            variant={location.pathname === "/profile" ? "secondary" : "ghost"}
-            className="w-full flex items-center justify-start gap-2"
-            onClick={() => navigate({ to: "/profile" })}
-          >
-            <FaBookOpen />
-            <span className="hidden lg:block">Books</span>
-          </Button>
-          <Button
-            variant={
-              location.pathname === "/profile/orders" ? "secondary" : "ghost"
-            }
-            className="w-full flex items-center justify-start gap-2"
-            onClick={() => navigate({ to: "/profile/orders" })}
-          >
-            <FaList />
-            <span className="hidden lg:block">Orders</span>
-          </Button>
-          <Button
-            variant={
-              location.pathname === "/profile/payments" ||
-              location.pathname.startsWith("/profile/payments/")
-                ? "secondary"
-                : "ghost"
-            }
-            className="w-full flex items-center justify-start gap-2"
-            onClick={() => navigate({ to: "/profile/payments" })}
-          >
-            <FaCreditCard />
-            <span className="hidden lg:block">Payments</span>
-          </Button>
+          {user?.isAdmin && (
+            <Button
+              variant={
+                location.pathname.includes("admin") ? "secondary" : "ghost"
+              }
+              className="w-full flex items-center justify-start gap-2"
+              onClick={() => navigate({ to: "/profile/admin" })}
+            >
+              <FaUser />
+              <span className="hidden lg:block">Admin</span>
+            </Button>
+          )}
+          {!user?.isAdmin && (
+            <>
+              <Button
+                variant={
+                  location.pathname === "/profile" ? "secondary" : "ghost"
+                }
+                className="w-full flex items-center justify-start gap-2"
+                onClick={() => navigate({ to: "/profile" })}
+              >
+                <FaBookOpen />
+                <span className="hidden lg:block">Books</span>
+              </Button>
+              <Button
+                variant={
+                  location.pathname === "/profile/orders"
+                    ? "secondary"
+                    : "ghost"
+                }
+                className="w-full flex items-center justify-start gap-2"
+                onClick={() => navigate({ to: "/profile/orders" })}
+              >
+                <FaList />
+                <span className="hidden lg:block">Orders</span>
+              </Button>
+              <Button
+                variant={
+                  location.pathname === "/profile/payments" ||
+                  location.pathname.startsWith("/profile/payments/")
+                    ? "secondary"
+                    : "ghost"
+                }
+                className="w-full flex items-center justify-start gap-2"
+                onClick={() => navigate({ to: "/profile/payments" })}
+              >
+                <FaCreditCard />
+                <span className="hidden lg:block">Payments</span>
+              </Button>
+            </>
+          )}
           <Button
             variant={
               location.pathname === "/profile/me" ? "secondary" : "ghost"
