@@ -21,8 +21,11 @@ import { Route as ProfileIndexImport } from './routes/profile/index'
 import { Route as OrdersIndexImport } from './routes/orders/index'
 import { Route as BooksIndexImport } from './routes/books/index'
 import { Route as ProfileMeImport } from './routes/profile/me'
+import { Route as ProfileHiddenBooksImport } from './routes/profile/hidden-books'
 import { Route as OrdersIdImport } from './routes/orders/$id'
+import { Route as ProfilePaymentsIndexImport } from './routes/profile/payments/index'
 import { Route as ProfileOrdersIndexImport } from './routes/profile/orders/index'
+import { Route as ProfilePaymentsIdImport } from './routes/profile/payments/$id'
 import { Route as ProfileOrdersIdImport } from './routes/profile/orders/$id'
 
 // Create/Update Routes
@@ -87,15 +90,33 @@ const ProfileMeRoute = ProfileMeImport.update({
   getParentRoute: () => ProfileRoute,
 } as any)
 
+const ProfileHiddenBooksRoute = ProfileHiddenBooksImport.update({
+  id: '/hidden-books',
+  path: '/hidden-books',
+  getParentRoute: () => ProfileRoute,
+} as any)
+
 const OrdersIdRoute = OrdersIdImport.update({
   id: '/orders/$id',
   path: '/orders/$id',
   getParentRoute: () => rootRoute,
 } as any)
 
+const ProfilePaymentsIndexRoute = ProfilePaymentsIndexImport.update({
+  id: '/payments/',
+  path: '/payments/',
+  getParentRoute: () => ProfileRoute,
+} as any)
+
 const ProfileOrdersIndexRoute = ProfileOrdersIndexImport.update({
   id: '/orders/',
   path: '/orders/',
+  getParentRoute: () => ProfileRoute,
+} as any)
+
+const ProfilePaymentsIdRoute = ProfilePaymentsIdImport.update({
+  id: '/payments/$id',
+  path: '/payments/$id',
   getParentRoute: () => ProfileRoute,
 } as any)
 
@@ -158,6 +179,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrdersIdImport
       parentRoute: typeof rootRoute
     }
+    '/profile/hidden-books': {
+      id: '/profile/hidden-books'
+      path: '/hidden-books'
+      fullPath: '/profile/hidden-books'
+      preLoaderRoute: typeof ProfileHiddenBooksImport
+      parentRoute: typeof ProfileImport
+    }
     '/profile/me': {
       id: '/profile/me'
       path: '/me'
@@ -193,11 +221,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileOrdersIdImport
       parentRoute: typeof ProfileImport
     }
+    '/profile/payments/$id': {
+      id: '/profile/payments/$id'
+      path: '/payments/$id'
+      fullPath: '/profile/payments/$id'
+      preLoaderRoute: typeof ProfilePaymentsIdImport
+      parentRoute: typeof ProfileImport
+    }
     '/profile/orders/': {
       id: '/profile/orders/'
       path: '/orders'
       fullPath: '/profile/orders'
       preLoaderRoute: typeof ProfileOrdersIndexImport
+      parentRoute: typeof ProfileImport
+    }
+    '/profile/payments/': {
+      id: '/profile/payments/'
+      path: '/payments'
+      fullPath: '/profile/payments'
+      preLoaderRoute: typeof ProfilePaymentsIndexImport
       parentRoute: typeof ProfileImport
     }
   }
@@ -206,17 +248,23 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface ProfileRouteChildren {
+  ProfileHiddenBooksRoute: typeof ProfileHiddenBooksRoute
   ProfileMeRoute: typeof ProfileMeRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
   ProfileOrdersIdRoute: typeof ProfileOrdersIdRoute
+  ProfilePaymentsIdRoute: typeof ProfilePaymentsIdRoute
   ProfileOrdersIndexRoute: typeof ProfileOrdersIndexRoute
+  ProfilePaymentsIndexRoute: typeof ProfilePaymentsIndexRoute
 }
 
 const ProfileRouteChildren: ProfileRouteChildren = {
+  ProfileHiddenBooksRoute: ProfileHiddenBooksRoute,
   ProfileMeRoute: ProfileMeRoute,
   ProfileIndexRoute: ProfileIndexRoute,
   ProfileOrdersIdRoute: ProfileOrdersIdRoute,
+  ProfilePaymentsIdRoute: ProfilePaymentsIdRoute,
   ProfileOrdersIndexRoute: ProfileOrdersIndexRoute,
+  ProfilePaymentsIndexRoute: ProfilePaymentsIndexRoute,
 }
 
 const ProfileRouteWithChildren =
@@ -230,12 +278,15 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRouteWithChildren
   '/signup': typeof SignupRoute
   '/orders/$id': typeof OrdersIdRoute
+  '/profile/hidden-books': typeof ProfileHiddenBooksRoute
   '/profile/me': typeof ProfileMeRoute
   '/books': typeof BooksIndexRoute
   '/orders': typeof OrdersIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/profile/orders/$id': typeof ProfileOrdersIdRoute
+  '/profile/payments/$id': typeof ProfilePaymentsIdRoute
   '/profile/orders': typeof ProfileOrdersIndexRoute
+  '/profile/payments': typeof ProfilePaymentsIndexRoute
 }
 
 export interface FileRoutesByTo {
@@ -245,12 +296,15 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/orders/$id': typeof OrdersIdRoute
+  '/profile/hidden-books': typeof ProfileHiddenBooksRoute
   '/profile/me': typeof ProfileMeRoute
   '/books': typeof BooksIndexRoute
   '/orders': typeof OrdersIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/profile/orders/$id': typeof ProfileOrdersIdRoute
+  '/profile/payments/$id': typeof ProfilePaymentsIdRoute
   '/profile/orders': typeof ProfileOrdersIndexRoute
+  '/profile/payments': typeof ProfilePaymentsIndexRoute
 }
 
 export interface FileRoutesById {
@@ -262,12 +316,15 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRouteWithChildren
   '/signup': typeof SignupRoute
   '/orders/$id': typeof OrdersIdRoute
+  '/profile/hidden-books': typeof ProfileHiddenBooksRoute
   '/profile/me': typeof ProfileMeRoute
   '/books/': typeof BooksIndexRoute
   '/orders/': typeof OrdersIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/profile/orders/$id': typeof ProfileOrdersIdRoute
+  '/profile/payments/$id': typeof ProfilePaymentsIdRoute
   '/profile/orders/': typeof ProfileOrdersIndexRoute
+  '/profile/payments/': typeof ProfilePaymentsIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -280,12 +337,15 @@ export interface FileRouteTypes {
     | '/profile'
     | '/signup'
     | '/orders/$id'
+    | '/profile/hidden-books'
     | '/profile/me'
     | '/books'
     | '/orders'
     | '/profile/'
     | '/profile/orders/$id'
+    | '/profile/payments/$id'
     | '/profile/orders'
+    | '/profile/payments'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -294,12 +354,15 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/orders/$id'
+    | '/profile/hidden-books'
     | '/profile/me'
     | '/books'
     | '/orders'
     | '/profile'
     | '/profile/orders/$id'
+    | '/profile/payments/$id'
     | '/profile/orders'
+    | '/profile/payments'
   id:
     | '__root__'
     | '/'
@@ -309,12 +372,15 @@ export interface FileRouteTypes {
     | '/profile'
     | '/signup'
     | '/orders/$id'
+    | '/profile/hidden-books'
     | '/profile/me'
     | '/books/'
     | '/orders/'
     | '/profile/'
     | '/profile/orders/$id'
+    | '/profile/payments/$id'
     | '/profile/orders/'
+    | '/profile/payments/'
   fileRoutesById: FileRoutesById
 }
 
@@ -378,10 +444,13 @@ export const routeTree = rootRoute
     "/profile": {
       "filePath": "profile.tsx",
       "children": [
+        "/profile/hidden-books",
         "/profile/me",
         "/profile/",
         "/profile/orders/$id",
-        "/profile/orders/"
+        "/profile/payments/$id",
+        "/profile/orders/",
+        "/profile/payments/"
       ]
     },
     "/signup": {
@@ -389,6 +458,10 @@ export const routeTree = rootRoute
     },
     "/orders/$id": {
       "filePath": "orders/$id.tsx"
+    },
+    "/profile/hidden-books": {
+      "filePath": "profile/hidden-books.tsx",
+      "parent": "/profile"
     },
     "/profile/me": {
       "filePath": "profile/me.tsx",
@@ -408,8 +481,16 @@ export const routeTree = rootRoute
       "filePath": "profile/orders/$id.tsx",
       "parent": "/profile"
     },
+    "/profile/payments/$id": {
+      "filePath": "profile/payments/$id.tsx",
+      "parent": "/profile"
+    },
     "/profile/orders/": {
       "filePath": "profile/orders/index.tsx",
+      "parent": "/profile"
+    },
+    "/profile/payments/": {
+      "filePath": "profile/payments/index.tsx",
       "parent": "/profile"
     }
   }

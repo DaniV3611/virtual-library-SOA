@@ -1,14 +1,18 @@
-from typing import List
-from fastapi import APIRouter, HTTPException, Request
+from typing import List, Optional
+from datetime import datetime
+from fastapi import APIRouter, HTTPException, Request, Query
 
 from app.api.dependencies.deps import CurrentUserDep
 from app.api.dependencies.session import SessionDep
 from app.models.order import Order
+from app.models.payment import Payment
 from app.schemas.order import OrderDetails, OrderOut
+from app.schemas.payment import PaymentCreate, PaymentsResponse
 from app.models.cart_item import CartItem
 from app.models.order_item import OrderItem
 from app.models.book import Book
 from app.services.epayco import EpaycoService
+from app.crud.payments import create_payment, get_payments_by_user_id, count_payments_by_user_id
 
 router = APIRouter()
 
@@ -22,6 +26,30 @@ def get_orders(
     """
     orders = session.query(Order).filter(Order.user_id == current_user.id).all()
     return orders
+
+@router.get("/payments", response_model=PaymentsResponse)
+def get_user_payments(
+    session: SessionDep,
+    current_user: CurrentUserDep,
+    skip: int = Query(0, ge=0, description="Number of payments to skip"),
+    limit: int = Query(100, ge=1, le=500, description="Maximum number of payments to return")
+) -> PaymentsResponse:
+    """
+    Get all payments for the current user with order information
+    """
+    payments = get_payments_by_user_id(
+        session, 
+        user_id=current_user.id,
+        skip=skip,
+        limit=limit
+    )
+    
+    total = count_payments_by_user_id(session, user_id=current_user.id)
+    
+    return PaymentsResponse(
+        payments=payments,
+        total=total
+    )
 
 @router.get("/{order_id}", response_model=OrderDetails)
 def get_order_details(
@@ -214,34 +242,90 @@ async def pay_order(
     # print("Payment", payment_epayco)
 
 
+    # Extract card information for storage (last 4 digits only for security)
+    card_number = data.get("card[number]", "")
+    card_last_four = card_number[-4:] if len(card_number) >= 4 else None
+    
+    # Determine card brand based on first digit (simplified)
+    card_brand = None
+    if card_number:
+        first_digit = card_number[0]
+        if first_digit == "4":
+            card_brand = "Visa"
+        elif first_digit == "5":
+            card_brand = "Mastercard"
+        elif first_digit == "3":
+            card_brand = "American Express"
+    
     if payment_epayco["status"] and payment_epayco["success"]:
-        # Update payment status based on ePayco response
-        # See https://docs.epayco.com/docs/paginas-de-respuestas
-        if payment_epayco["data"]["cod_respuesta"] == 1:
-            # Payment was successful
+        # Determine payment status based on ePayco response
+        epayco_response_code = payment_epayco["data"]["cod_respuesta"]
+        payment_status = "pending"  # default
+        
+        if epayco_response_code == 1:
+            payment_status = "completed"
             order.status = "completed"
-        elif payment_epayco["data"]["cod_respuesta"] == 2:
+        elif epayco_response_code == 2:
+            payment_status = "rejected"
             order.status = "rejected"
-        elif payment_epayco["data"]["cod_respuesta"] == 3:
+        elif epayco_response_code == 3:
+            payment_status = "pending"
             order.status = "pending"
-        elif payment_epayco["data"]["cod_respuesta"] == 4:
+        elif epayco_response_code == 4:
+            payment_status = "failed"
             order.status = "failed"
-        elif payment_epayco["data"]["cod_respuesta"] == 6:
+        elif epayco_response_code == 6:
+            payment_status = "reversed"
             order.status = "reversed"
-        elif payment_epayco["data"]["cod_respuesta"] == 7:
+        elif epayco_response_code == 7:
+            payment_status = "retained"
             order.status = "retained"
-        elif payment_epayco["data"]["cod_respuesta"] == 8:
+        elif epayco_response_code == 8:
+            payment_status = "started"
             order.status = "started"
-        elif payment_epayco["data"]["cod_respuesta"] == 9:
+        elif epayco_response_code == 9:
+            payment_status = "expired"
             order.status = "expired"
-        elif payment_epayco["data"]["cod_respuesta"] == 10:
+        elif epayco_response_code == 10:
+            payment_status = "abandoned"
             order.status = "abandoned"
-        elif payment_epayco["data"]["cod_respuesta"] == 11:
+        elif epayco_response_code == 11:
+            payment_status = "canceled"
             order.status = "canceled"
 
-
-        print(f"Processing payment for order {order_id} from IP {client_ip}")
+        # Create payment record
+        payment_data = PaymentCreate(
+            order_id=order.id,
+            amount=order.total_amount,
+            status=payment_status,
+            payment_method="credit_card",
+            
+            # ePayco information - convert to strings to handle integer responses
+            epayco_transaction_id=str(payment_epayco["data"].get("ref_payco")) if payment_epayco["data"].get("ref_payco") is not None else None,
+            epayco_response_code=epayco_response_code,
+            epayco_response_message=str(payment_epayco["data"].get("respuesta")) if payment_epayco["data"].get("respuesta") is not None else None,
+            epayco_approval_code=str(payment_epayco["data"].get("cod_autorizacion")) if payment_epayco["data"].get("cod_autorizacion") is not None else None,
+            epayco_receipt=str(payment_epayco["data"].get("recibo")) if payment_epayco["data"].get("recibo") is not None else None,
+            
+            # Card information (secure)
+            card_last_four=card_last_four,
+            card_brand=card_brand,
+            
+            # Client information
+            client_name=f"{data.get('name', '')} {data.get('last_name', '')}".strip(),
+            client_email=data.get("email"),
+            client_phone=data.get("phone"),
+            client_ip=client_ip,
+            
+            processed_at=datetime.utcnow()
+        )
         
+        # Save payment record
+        payment_record = create_payment(session, payment_data)
+        
+        print(f"Payment created with ID: {payment_record.id} for order {order_id} from IP {client_ip}")
+        
+        # Update order status
         session.commit()
 
 
@@ -254,6 +338,7 @@ async def pay_order(
             "total_amount": order.total_amount,
             "status": order.status,
             "created_at": order.created_at,
+            "payment_id": str(payment_record.id),  # Include payment ID for frontend navigation
             "items": [
                 {
                     "book_id": item.book_id,
@@ -269,4 +354,31 @@ async def pay_order(
         }
     
     else:
+        # Payment failed - still record the attempt
+        payment_data = PaymentCreate(
+            order_id=order.id,
+            amount=order.total_amount,
+            status="failed",
+            payment_method="credit_card",
+            
+            # ePayco information (if available) - convert to string
+            epayco_response_message=str(payment_epayco.get("data", {}).get("respuesta", "Payment failed")),
+            
+            # Card information (secure)
+            card_last_four=card_last_four,
+            card_brand=card_brand,
+            
+            # Client information
+            client_name=f"{data.get('name', '')} {data.get('last_name', '')}".strip(),
+            client_email=data.get("email"),
+            client_phone=data.get("phone"),
+            client_ip=client_ip,
+            
+            processed_at=datetime.utcnow()
+        )
+        
+        # Save failed payment record
+        payment_record = create_payment(session, payment_data)
+        print(f"Failed payment recorded with ID: {payment_record.id} for order {order_id}")
+        
         raise HTTPException(status_code=422, detail="Payment failed")

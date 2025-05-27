@@ -1,15 +1,6 @@
 import { useState, useEffect } from "react";
-import { API_ENDPOINT } from "../config";
-
-interface Book {
-  id: string;
-  title: string;
-  author: string;
-  description: string;
-  price: number;
-  cover_url: string | null;
-  file_url: string | null;
-}
+import { apiClient } from "@/utils/apiClient";
+import { Book } from "@/types/books";
 
 export function useBooks() {
   const [mostPurchased, setMostPurchased] = useState<Book[]>([]);
@@ -24,8 +15,8 @@ export function useBooks() {
         setError(null);
 
         // Fetch most purchased books
-        const mostPurchasedResponse = await fetch(
-          `${API_ENDPOINT}/books/most-purchased`
+        const mostPurchasedResponse = await apiClient.get(
+          "/books/most-purchased"
         );
         if (!mostPurchasedResponse.ok)
           throw new Error("Failed to fetch most purchased books");
@@ -33,7 +24,7 @@ export function useBooks() {
         setMostPurchased(mostPurchasedData);
 
         // Fetch latest books
-        const latestResponse = await fetch(`${API_ENDPOINT}/books/latest`);
+        const latestResponse = await apiClient.get("/books/latest");
         if (!latestResponse.ok) throw new Error("Failed to fetch latest books");
         const latestData = await latestResponse.json();
         setLatest(latestData);

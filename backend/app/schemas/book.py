@@ -1,6 +1,7 @@
 # Book out schema
 import uuid
 from typing import Optional
+from datetime import datetime
 from pydantic import BaseModel
 from app.utils.security_validations import sanitize_input
 
@@ -17,7 +18,22 @@ class BookOut(BaseModel):
     file_url: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+class PurchasedBookOut(BaseModel):
+    """Schema for purchased books with order information"""
+    
+    id: uuid.UUID
+    title: str
+    author: str
+    description: str
+    cover_url: Optional[str] = None
+    file_url: Optional[str] = None
+    order_id: uuid.UUID
+    purchased_at: datetime
+
+    class Config:
+        from_attributes = True
 
 class BookCreate(BaseModel):
 

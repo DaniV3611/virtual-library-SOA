@@ -6,3 +6,4 @@ from .order_item import OrderItem
 from .cart_item import CartItem
 from .payment import Payment
 from .user_session import UserSession
+from .user_hidden_book import UserHiddenBook
