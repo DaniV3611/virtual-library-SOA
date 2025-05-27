@@ -1,4 +1,9 @@
-import { Button } from "@/components/ui/button";
+import useAuth from "@/hooks/useAuth";
+import { useEffect } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { toast } from "sonner";
+import { API_ENDPOINT } from "@/config";
 import {
   Table,
   TableBody,
@@ -7,13 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { API_ENDPOINT } from "@/config";
-import useAuth from "@/hooks/useAuth";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/profile/orders")({
+export const Route = createFileRoute("/profile/orders/")({
   component: RouteComponent,
 });
 
@@ -88,7 +89,14 @@ function RouteComponent() {
                   })}
                 </TableCell>
                 <TableCell className="flex justify-center">
-                  <Button variant="outline">View Details</Button>
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      navigate({ to: `/profile/orders/${order.id}` })
+                    }
+                  >
+                    View Details
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}

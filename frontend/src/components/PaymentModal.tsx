@@ -113,7 +113,7 @@ export default function PaymentModal({
       }`}
     >
       <div
-        className={`bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 ${
+        className={`bg-white dark:bg-neutral-800 rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 ${
           isModalVisible
             ? "translate-y-0 opacity-100"
             : "translate-y-4 opacity-0"
@@ -123,7 +123,7 @@ export default function PaymentModal({
           <h2 className="text-2xl font-bold">Payment Information</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors duration-200 cursor-pointer"
+            className="text-gray-700 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200 cursor-pointer"
           >
             <svg
               className="w-6 h-6"
@@ -148,7 +148,7 @@ export default function PaymentModal({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Card Number
                 </label>
                 <input
@@ -164,7 +164,7 @@ export default function PaymentModal({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Expiration Month
                   </label>
                   <input
@@ -178,7 +178,7 @@ export default function PaymentModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Expiration Year
                   </label>
                   <input
@@ -194,7 +194,7 @@ export default function PaymentModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   CVC
                 </label>
                 <input
@@ -216,7 +216,7 @@ export default function PaymentModal({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Name
                 </label>
                 <input
@@ -230,7 +230,7 @@ export default function PaymentModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Last Name
                 </label>
                 <input
@@ -243,7 +243,7 @@ export default function PaymentModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Email
                 </label>
                 <input
@@ -257,7 +257,7 @@ export default function PaymentModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Phone
                 </label>
                 <input
@@ -271,7 +271,7 @@ export default function PaymentModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Cell Phone
                 </label>
                 <input
@@ -285,7 +285,7 @@ export default function PaymentModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Identification
                 </label>
                 <input
@@ -299,7 +299,7 @@ export default function PaymentModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   City
                 </label>
                 <input
@@ -313,7 +313,7 @@ export default function PaymentModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Address
                 </label>
                 <input
@@ -330,13 +330,15 @@ export default function PaymentModal({
 
           <div className="flex justify-between items-center pt-4">
             <div>
-              <p className="text-sm text-gray-600">Total Amount:</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                Total Amount:
+              </p>
               <p className="text-xl font-bold">${totalAmount.toFixed(2)}</p>
             </div>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-semibold transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-800 text-white px-6 py-2 rounded-md font-semibold transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? "Processing..." : "Pay Now"}
             </button>

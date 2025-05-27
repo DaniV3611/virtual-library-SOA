@@ -83,7 +83,7 @@ function Cart() {
       toast.success("Order created!");
 
       setTimeout(() => {
-        navigate({ to: `/orders/${order.id}` });
+        navigate({ to: `/profile/orders/${order.id}` });
       }, 1500);
     } catch (error) {
       console.error("Error processing purchase:", error);
