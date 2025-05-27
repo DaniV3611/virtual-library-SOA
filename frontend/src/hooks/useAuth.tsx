@@ -1,5 +1,6 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { API_ENDPOINT } from "../config";
+import { toast } from "sonner";
 
 // Types
 interface User {
@@ -71,16 +72,50 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           } else {
             // If token is invalid, remove it
             removeToken();
+            setAuthToken(null);
+            setUser(null);
           }
         } catch (err) {
           console.error("Error during auth initialization:", err);
           removeToken();
+          setAuthToken(null);
+          setUser(null);
         }
       }
       setIsLoading(false);
     };
 
     initAuth();
+  }, []);
+
+  // Listen for session revocation events
+  useEffect(() => {
+    const handleSessionRevoked = (event: CustomEvent) => {
+      const { message } = event.detail;
+
+      // Clear auth state
+      setUser(null);
+      setAuthToken(null);
+      setError("Your session has been revoked from another device");
+
+      // Show notification
+      toast.error(message || "Session has been revoked", {
+        description: "You have been logged out. Please log in again.",
+        duration: 5000,
+      });
+    };
+
+    window.addEventListener(
+      "session-revoked",
+      handleSessionRevoked as EventListener
+    );
+
+    return () => {
+      window.removeEventListener(
+        "session-revoked",
+        handleSessionRevoked as EventListener
+      );
+    };
   }, []);
 
   // Login function
