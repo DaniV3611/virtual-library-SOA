@@ -22,7 +22,7 @@ interface OrderItem {
 interface Order {
   id: string;
   user_id: string;
-  total_amount: number;
+  total_amount: number | string;
   status: string;
   created_at: string;
   items: OrderItem[];
@@ -322,7 +322,10 @@ function OrderDetails() {
                 <div className="flex justify-between items-center text-lg">
                   <span className="font-semibold">Total Amount:</span>
                   <span className="font-bold text-xl">
-                    ${order.total_amount.toFixed(2)}
+                    $
+                    {typeof order.total_amount === "number"
+                      ? order.total_amount.toFixed(2)
+                      : parseFloat(order.total_amount || "0").toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -394,7 +397,11 @@ function OrderDetails() {
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         onPay={handlePay}
-        totalAmount={order?.total_amount || 0}
+        totalAmount={
+          typeof order?.total_amount === "number"
+            ? order.total_amount
+            : parseFloat(order?.total_amount || "0")
+        }
       />
     </div>
   );
