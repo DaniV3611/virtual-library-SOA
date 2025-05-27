@@ -12,7 +12,7 @@ from app.models.cart_item import CartItem
 from app.models.order_item import OrderItem
 from app.models.book import Book
 from app.services.epayco import EpaycoService
-from app.crud.payments import create_payment, get_payments_by_user_id, count_payments_by_user_id
+from app.crud.payments import create_payment, get_payments_by_user_id, count_payments_by_user_id, get_all_payments_with_order_info, count_all_payments
 
 router = APIRouter()
 
@@ -35,16 +35,22 @@ def get_user_payments(
     limit: int = Query(100, ge=1, le=500, description="Maximum number of payments to return")
 ) -> PaymentsResponse:
     """
-    Get all payments for the current user with order information
+    Get all payments for the current user with order information.
+    If user is admin, returns all payments in the system.
     """
-    payments = get_payments_by_user_id(
-        session, 
-        user_id=current_user.id,
-        skip=skip,
-        limit=limit
-    )
-    
-    total = count_payments_by_user_id(session, user_id=current_user.id)
+    if current_user.role == "admin":
+        # Admin can see all payments
+        payments = get_all_payments_with_order_info(session, skip=skip, limit=limit)
+        total = count_all_payments(session)
+    else:
+        # Regular users see only their own payments
+        payments = get_payments_by_user_id(
+            session, 
+            user_id=current_user.id,
+            skip=skip,
+            limit=limit
+        )
+        total = count_payments_by_user_id(session, user_id=current_user.id)
     
     return PaymentsResponse(
         payments=payments,

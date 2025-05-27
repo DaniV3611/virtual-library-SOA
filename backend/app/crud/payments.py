@@ -110,4 +110,55 @@ def update_payment_status(
         
         session.commit()
         session.refresh(payment)
-    return payment 
+    return payment
+
+def get_all_payments_with_order_info(
+    session: Session, 
+    skip: int = 0, 
+    limit: int = 100
+) -> List[PaymentWithOrder]:
+    """Get all payments in the system with order information (for admin use)"""
+    payments_query = (
+        session.query(Payment, Order)
+        .join(Order, Payment.order_id == Order.id)
+        .filter(Payment.status == "completed")
+        .order_by(Payment.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+    )
+    
+    payments_with_orders = []
+    for payment, order in payments_query:
+        payment_with_order = PaymentWithOrder(
+            # Payment fields
+            id=payment.id,
+            order_id=payment.order_id,
+            amount=payment.amount,
+            status=payment.status,
+            payment_method=payment.payment_method,
+            epayco_transaction_id=payment.epayco_transaction_id,
+            epayco_response_code=payment.epayco_response_code,
+            epayco_response_message=payment.epayco_response_message,
+            epayco_approval_code=payment.epayco_approval_code,
+            epayco_receipt=payment.epayco_receipt,
+            card_last_four=payment.card_last_four,
+            card_brand=payment.card_brand,
+            client_name=payment.client_name,
+            client_email=payment.client_email,
+            client_phone=payment.client_phone,
+            client_ip=str(payment.client_ip) if payment.client_ip else None,
+            created_at=payment.created_at,
+            processed_at=payment.processed_at,
+            updated_at=payment.updated_at,
+            # Order fields
+            order_total=order.total_amount,
+            order_status=order.status,
+            order_created_at=order.created_at
+        )
+        payments_with_orders.append(payment_with_order)
+    
+    return payments_with_orders
+
+def count_all_payments(session: Session) -> int:
+    """Count total payments in the system (for admin use)"""
+    return session.query(Payment).filter(Payment.status == "completed").count() 

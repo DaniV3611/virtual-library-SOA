@@ -21,7 +21,7 @@ export const Route = createFileRoute("/profile")({
 });
 
 function Profile() {
-  const { isAuthenticated, authToken } = useAuth();
+  const { isAuthenticated, authToken, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -30,6 +30,10 @@ function Profile() {
       toast.error("Please log in to view your profile");
       navigate({ to: "/login" });
       return;
+    } else {
+      if (user?.isAdmin) {
+        navigate({ to: "/profile/admin" });
+      }
     }
   }, [isAuthenticated, authToken, navigate]);
 
@@ -40,6 +44,16 @@ function Profile() {
   return (
     <div className="w-full h-dvh flex flex-row items-center pt-14 md:pt-13">
       <aside className="lg:w-xs h-full p-4 flex flex-col justify-between gap-2 transition-transform">
+        {user?.isAdmin && (
+          <Button
+            variant="secondary"
+            className="w-full flex items-center justify-start gap-2"
+            onClick={() => navigate({ to: "/profile/admin" })}
+          >
+            <FaUser />
+            <span className="hidden lg:block">Admin</span>
+          </Button>
+        )}
         <div className="flex flex-col gap-2">
           <Button
             variant={location.pathname === "/profile" ? "secondary" : "ghost"}
