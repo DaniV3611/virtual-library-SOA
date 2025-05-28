@@ -31,7 +31,7 @@ function AppWithUserDetection() {
       <Header />
       <Outlet />
       {/* <TanStackRouterDevtools /> */}
-      <Toaster />
+      <Toaster richColors />
     </div>
   );
 }

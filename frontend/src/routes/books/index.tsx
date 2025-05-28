@@ -353,7 +353,7 @@ function BooksPage() {
           open={!!selectedBook}
           onOpenChange={() => setSelectedBook(null)}
         >
-          <DialogContent className="z-[60] max-h-[90dvh] overflow-y-auto">
+          <DialogContent className="z-[60] max-h-[90dvh] overflow-y-auto backdrop-blur-md">
             <DialogHeader>
               <DialogTitle className="sticky top-0 z-10">
                 <span className="flex items-center justify-between mr-4">
