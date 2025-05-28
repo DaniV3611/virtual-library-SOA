@@ -29,6 +29,7 @@ import { Route as ProfileAdminIndexImport } from './routes/profile/admin/index'
 import { Route as ProfilePaymentsIdImport } from './routes/profile/payments/$id'
 import { Route as ProfileOrdersIdImport } from './routes/profile/orders/$id'
 import { Route as ProfileAdminCreateImport } from './routes/profile/admin/create'
+import { Route as ProfileAdminBooksImport } from './routes/profile/admin/books'
 import { Route as ProfileAdminIdImport } from './routes/profile/admin/$id'
 
 // Create/Update Routes
@@ -141,6 +142,12 @@ const ProfileAdminCreateRoute = ProfileAdminCreateImport.update({
   getParentRoute: () => ProfileRoute,
 } as any)
 
+const ProfileAdminBooksRoute = ProfileAdminBooksImport.update({
+  id: '/admin/books',
+  path: '/admin/books',
+  getParentRoute: () => ProfileRoute,
+} as any)
+
 const ProfileAdminIdRoute = ProfileAdminIdImport.update({
   id: '/admin/$id',
   path: '/admin/$id',
@@ -242,6 +249,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileAdminIdImport
       parentRoute: typeof ProfileImport
     }
+    '/profile/admin/books': {
+      id: '/profile/admin/books'
+      path: '/admin/books'
+      fullPath: '/profile/admin/books'
+      preLoaderRoute: typeof ProfileAdminBooksImport
+      parentRoute: typeof ProfileImport
+    }
     '/profile/admin/create': {
       id: '/profile/admin/create'
       path: '/admin/create'
@@ -294,6 +308,7 @@ interface ProfileRouteChildren {
   ProfileMeRoute: typeof ProfileMeRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
   ProfileAdminIdRoute: typeof ProfileAdminIdRoute
+  ProfileAdminBooksRoute: typeof ProfileAdminBooksRoute
   ProfileAdminCreateRoute: typeof ProfileAdminCreateRoute
   ProfileOrdersIdRoute: typeof ProfileOrdersIdRoute
   ProfilePaymentsIdRoute: typeof ProfilePaymentsIdRoute
@@ -307,6 +322,7 @@ const ProfileRouteChildren: ProfileRouteChildren = {
   ProfileMeRoute: ProfileMeRoute,
   ProfileIndexRoute: ProfileIndexRoute,
   ProfileAdminIdRoute: ProfileAdminIdRoute,
+  ProfileAdminBooksRoute: ProfileAdminBooksRoute,
   ProfileAdminCreateRoute: ProfileAdminCreateRoute,
   ProfileOrdersIdRoute: ProfileOrdersIdRoute,
   ProfilePaymentsIdRoute: ProfilePaymentsIdRoute,
@@ -332,6 +348,7 @@ export interface FileRoutesByFullPath {
   '/orders': typeof OrdersIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/profile/admin/$id': typeof ProfileAdminIdRoute
+  '/profile/admin/books': typeof ProfileAdminBooksRoute
   '/profile/admin/create': typeof ProfileAdminCreateRoute
   '/profile/orders/$id': typeof ProfileOrdersIdRoute
   '/profile/payments/$id': typeof ProfilePaymentsIdRoute
@@ -353,6 +370,7 @@ export interface FileRoutesByTo {
   '/orders': typeof OrdersIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/profile/admin/$id': typeof ProfileAdminIdRoute
+  '/profile/admin/books': typeof ProfileAdminBooksRoute
   '/profile/admin/create': typeof ProfileAdminCreateRoute
   '/profile/orders/$id': typeof ProfileOrdersIdRoute
   '/profile/payments/$id': typeof ProfilePaymentsIdRoute
@@ -376,6 +394,7 @@ export interface FileRoutesById {
   '/orders/': typeof OrdersIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/profile/admin/$id': typeof ProfileAdminIdRoute
+  '/profile/admin/books': typeof ProfileAdminBooksRoute
   '/profile/admin/create': typeof ProfileAdminCreateRoute
   '/profile/orders/$id': typeof ProfileOrdersIdRoute
   '/profile/payments/$id': typeof ProfilePaymentsIdRoute
@@ -400,6 +419,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/profile/'
     | '/profile/admin/$id'
+    | '/profile/admin/books'
     | '/profile/admin/create'
     | '/profile/orders/$id'
     | '/profile/payments/$id'
@@ -420,6 +440,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/profile'
     | '/profile/admin/$id'
+    | '/profile/admin/books'
     | '/profile/admin/create'
     | '/profile/orders/$id'
     | '/profile/payments/$id'
@@ -441,6 +462,7 @@ export interface FileRouteTypes {
     | '/orders/'
     | '/profile/'
     | '/profile/admin/$id'
+    | '/profile/admin/books'
     | '/profile/admin/create'
     | '/profile/orders/$id'
     | '/profile/payments/$id'
@@ -514,6 +536,7 @@ export const routeTree = rootRoute
         "/profile/me",
         "/profile/",
         "/profile/admin/$id",
+        "/profile/admin/books",
         "/profile/admin/create",
         "/profile/orders/$id",
         "/profile/payments/$id",
@@ -548,6 +571,10 @@ export const routeTree = rootRoute
     },
     "/profile/admin/$id": {
       "filePath": "profile/admin/$id.tsx",
+      "parent": "/profile"
+    },
+    "/profile/admin/books": {
+      "filePath": "profile/admin/books.tsx",
       "parent": "/profile"
     },
     "/profile/admin/create": {

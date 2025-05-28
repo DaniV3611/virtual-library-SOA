@@ -293,10 +293,12 @@ function AdminDashboard() {
             </div>
             {books.length > 5 && (
               <div className="mt-4 text-center">
-                <Button variant="outline" size="sm">
-                  <Eye className="h-4 w-4 mr-2" />
-                  View All Books
-                </Button>
+                <Link to="/profile/admin/books">
+                  <Button variant="outline" size="sm">
+                    <Eye className="h-4 w-4 mr-2" />
+                    View All Books
+                  </Button>
+                </Link>
               </div>
             )}
           </CardContent>
