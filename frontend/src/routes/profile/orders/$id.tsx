@@ -109,15 +109,11 @@ function OrderDetails() {
         "card[cvc]": paymentData.cvc,
         hasCvv: true,
 
-        // Client info
-        name: paymentData.name,
-        last_name: paymentData.lastName,
-        email: paymentData.email,
+        // Client info (simplified - name and email come from authenticated user)
         phone: paymentData.phone,
-        city: paymentData.city,
-        address: paymentData.address,
-        cell_phone: paymentData.cellPhone,
         identification: paymentData.identification,
+        city: paymentData.city || "Unknown", // Optional with default
+        address: paymentData.address || "N/A", // Optional with default
         amount: order?.total_amount.toString(),
         dues: "1",
       });

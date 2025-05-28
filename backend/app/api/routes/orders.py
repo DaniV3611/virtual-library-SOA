@@ -108,7 +108,7 @@ def create_order(
     """
     Create a new order from the user's shopping cart.
     """
-    # Obtener el carrito del usuario
+    # Get user's shopping cart
     cart_items = session.query(CartItem).filter(
         CartItem.user_id == current_user.id
     ).all()
@@ -116,22 +116,22 @@ def create_order(
     if not cart_items:
         raise HTTPException(
             status_code=400,
-            detail="El carrito está vacío"
+            detail="Shopping cart is empty"
         )
     
-    # Calcular el total del pedido
+    # Calculate order total
     total_amount = sum(item.quantity * item.book.price for item in cart_items)
     
-    # Crear la orden
+    # Create the order
     order = Order(
         user_id=current_user.id,
         total_amount=total_amount,
         status="created"
     )
     session.add(order)
-    session.flush()  # Para obtener el ID de la orden
+    session.flush()  # To get the order ID
     
-    # Crear los items de la orden
+    # Create order items
     for cart_item in cart_items:
         order_item = OrderItem(
             order_id=order.id,
@@ -141,7 +141,7 @@ def create_order(
         )
         session.add(order_item)
         
-        # Eliminar el item del carrito
+        # Remove item from cart
         session.delete(cart_item)
     
     session.commit()
@@ -156,31 +156,9 @@ async def pay_order(
     session: SessionDep,
     current_user: CurrentUserDep,
 ):
-    
-    # data = {
-    #     # Credit info
-    #     "card[number]": "4575623182290326",
-    #     "card[exp_year]": "2025",
-    #     "card[exp_month]": "19",
-    #     "card[cvc]": "123",
-    #     "hasCvv": True,
-
-    #     # Client info
-    #     "name": "Joe",
-    #     "last_name": "Doe", #This parameter is optional
-    #     "email": "joe@payco.co",
-    #     "phone": "3005234321",
-    #     "city": "Bogota",
-    #     "address": "Cr 4 # 55 36",
-    #     "phone": "3005234321",
-    #     "cell_phone": "3010000001",
-    #     "identification": "123456789",
-    #     "amount": "10000",
-    #     "dues": "1",
-    # }
-
     """
-    Process payment for an order.
+    Process payment for an order using simplified payment data.
+    User information is taken from the authenticated user.
     """
     order = session.query(Order).filter(
         Order.id == order_id,
@@ -206,49 +184,43 @@ async def pay_order(
         "hasCvv": True
     })
 
-    # print("Token creado", token)
-
     if not token["status"]:
         raise HTTPException(status_code=422, detail="Invalid credit info")
     
+    # Split user name into first and last name
+    user_name_parts = current_user.name.split(' ', 1)
+    first_name = user_name_parts[0]
+    last_name = user_name_parts[1] if len(user_name_parts) > 1 else ""
+    
     client_epayco = epayco.create_client({
         "token_card": token.get("id"),
-        "name": data["name"],
-        "last_name": data["last_name"],
-        "email": data["email"],
+        "name": first_name,
+        "last_name": last_name,
+        "email": current_user.email,  # Use authenticated user's email
         "phone": data["phone"],
         "default": True,
-        "city": data["city"],
-        "address": data["address"],
-        "cell_phone": data["cell_phone"]
+        "city": data.get("city", "Unknown"),  # Make city optional with default
+        "address": data.get("address", "N/A"),  # Make address optional with default
+        "cell_phone": data["phone"]  # Use same phone for both fields
     })
-
-    # print("Cliente creado", client_epayco)
 
     if not client_epayco["status"]:
         raise HTTPException(status_code=422, detail="Failed to create ePayco client")
 
-    # print("Client:", client_epayco)
-
     client_id = client_epayco["data"]["customerId"]
-
-    # print("Cliente id", client_id)
 
     payment_epayco = epayco.charge(
         token_card=token.get("id"),
         customer_id=client_id,
         client={
             "identification": data["identification"],
-            "full_name": f"{data['name']} {data['last_name']}",
-            "email": data["email"],
+            "full_name": current_user.name,  # Use full name from user model
+            "email": current_user.email,  # Use authenticated user's email
         },
         amount=data["amount"],
         bill=order.id,
         client_ip=client_ip
     )
-
-    # print("Payment", payment_epayco)
-
 
     # Extract card information for storage (last 4 digits only for security)
     card_number = data.get("card[number]", "")
@@ -301,7 +273,7 @@ async def pay_order(
             payment_status = "canceled"
             order.status = "canceled"
 
-        # Create payment record
+        # Create payment record using user information
         payment_data = PaymentCreate(
             order_id=order.id,
             amount=order.total_amount,
@@ -319,9 +291,9 @@ async def pay_order(
             card_last_four=card_last_four,
             card_brand=card_brand,
             
-            # Client information
-            client_name=f"{data.get('name', '')} {data.get('last_name', '')}".strip(),
-            client_email=data.get("email"),
+            # Client information from authenticated user
+            client_name=current_user.name,
+            client_email=current_user.email,
             client_phone=data.get("phone"),
             client_ip=client_ip,
             
@@ -388,9 +360,9 @@ async def pay_order(
             card_last_four=card_last_four,
             card_brand=card_brand,
             
-            # Client information
-            client_name=f"{data.get('name', '')} {data.get('last_name', '')}".strip(),
-            client_email=data.get("email"),
+            # Client information from authenticated user
+            client_name=current_user.name,
+            client_email=current_user.email,
             client_phone=data.get("phone"),
             client_ip=client_ip,
             
