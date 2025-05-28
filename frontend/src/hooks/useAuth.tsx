@@ -124,13 +124,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (credentials.username.length < 5 || credentials.password.length < 5) {
       setError("Username and password must be at least 5 characters long");
       setIsLoading(false);
-      return;
+      throw new Error(
+        "Username and password must be at least 5 characters long"
+      );
     }
     // Check if credentials are not too long
-    if (credentials.username.length > 20 || credentials.password.length > 20) {
-      setError("Username and password must be at most 20 characters long");
+    if (credentials.username.length > 50 || credentials.password.length > 20) {
+      setError("Username and password must be at most 50 characters long");
       setIsLoading(false);
-      return;
+      throw new Error(
+        "Username must be at most 50 characters and password must be at most 20 characters"
+      );
     }
 
     try {
