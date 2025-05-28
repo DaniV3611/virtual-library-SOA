@@ -75,7 +75,7 @@ def delete_book_db(session: SessionDep, book_id: str) -> bool:
     session.commit()
     return True
 
-def get_most_purchased_books(session: SessionDep, user_id: Optional[uuid.UUID] = None, limit: int = 3) -> List[Book]:
+def get_most_purchased_books(session: SessionDep, user_id: Optional[uuid.UUID] = None, limit: int = 5) -> List[Book]:
     """
     Get the most purchased books based on order items count, excluding hidden books for the user
     """
@@ -107,7 +107,7 @@ def get_most_purchased_books(session: SessionDep, user_id: Optional[uuid.UUID] =
     
     return [book[0] for book in books]
 
-def get_latest_books(session: SessionDep, user_id: Optional[uuid.UUID] = None, limit: int = 3) -> List[Book]:
+def get_latest_books(session: SessionDep, user_id: Optional[uuid.UUID] = None, limit: int = 5) -> List[Book]:
     """
     Get the most recently created books, excluding hidden books for the user
     """
