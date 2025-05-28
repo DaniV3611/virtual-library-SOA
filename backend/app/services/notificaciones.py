@@ -16,28 +16,45 @@ class noificaciones:
         self.mailer = FastMail(self.conf)
 
     async def send_sale_notification(self, to_email: str, client_name: str, amount: str, bill: str, books: list[str]):
-        subject = "Confirmación de compra - Librería Virtual"
-        books_list = '\n'.join(f'- {book}' for book in books) if books else 'No se registraron libros.'
-        body = f"""
-        Hola {client_name},
+        try:
+            subject = "Confirmación de compra - Librería Virtual"
+            books_list = '\n'.join(f'- {book}' for book in books) if books else 'No se registraron libros.'
+            body = f"""
+            Hola {client_name},
 
-        Gracias por tu compra en nuestra Librería Virtual.
-        
-        Detalles del pedido:
-        - Número de factura: {bill}
-        - Monto pagado: {amount} USD
-        - Libros comprados:\n{books_list}
+            Gracias por tu compra en nuestra Librería Virtual.
+            
+            Detalles del pedido:
+            - Número de factura: {bill}
+            - Monto pagado: {amount} USD
+            - Libros comprados:\n{books_list}
 
-        ¡Esperamos que disfrutes de tu compra!
+            ¡Esperamos que disfrutes de tu compra!
 
-        Saludos,
-        Equipo Librería Virtual
-        """
-        message = MessageSchema(
-            subject=subject,
-            recipients=[to_email],
-            body=body,
-            subtype="plain"
-        )
+            Saludos,
+            Equipo Librería Virtual
+            """
+            message = MessageSchema(
+                subject=subject,
+                recipients=[to_email],
+                body=body,
+                subtype="plain"
+            )
 
-        await self.mailer.send_message(message)
+            await self.mailer.send_message(message)
+        except Exception as e:
+                print(f"Error enviando notificación: {e}")
+
+    async def send_test_email(self, to_email: str, message: str):
+        try:
+            subject = "Correo de prueba - Librería Virtual"
+            body = message
+            test_message = MessageSchema(
+                subject=subject,
+                recipients=[to_email],
+                body=body,
+                subtype="plain"
+            )
+            await self.mailer.send_message(test_message)
+        except Exception as e:
+            print(f"Error enviando correo de prueba: {e}")

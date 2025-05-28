@@ -21,6 +21,7 @@ epaycosdk==3.3.2
 exceptiongroup==1.2.2
 face==24.0.0
 fastapi==0.115.12
+fastapi-mail==1.4.1
 filelock==3.16.1
 glom==22.1.0
 googleapis-common-protos==1.70.0
