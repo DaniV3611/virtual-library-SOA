@@ -11,7 +11,9 @@ from app.schemas.payment import PaymentCreate, PaymentsResponse
 from app.models.cart_item import CartItem
 from app.models.order_item import OrderItem
 from app.models.book import Book
+from app.models.user import User
 from app.services.epayco import EpaycoService
+from app.services.notificaciones import noificaciones
 from app.crud.payments import create_payment, get_payments_by_user_id, count_payments_by_user_id, get_all_payments_with_order_info, count_all_payments
 
 router = APIRouter()
@@ -334,9 +336,21 @@ async def pay_order(
         # Update order status
         session.commit()
 
-
         # Get order details
         items = session.query(OrderItem).filter(OrderItem.order_id == order.id).join(Book).where(OrderItem.book_id == Book.id).all()
+
+        # Send invoice notification if payment was successful
+        try:
+            notification_service = noificaciones()
+            await notification_service.send_invoice_html_notification(
+                order=order,
+                payment=payment_record,
+                user=current_user,
+                order_items=items
+            )
+        except Exception as e:
+            print(f"Error sending invoice email: {e}")
+            # Don't interrupt the flow if email sending fails
 
         return {
             "id": order.id,
