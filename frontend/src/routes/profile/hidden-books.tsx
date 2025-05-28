@@ -128,7 +128,7 @@ function HiddenBooksPage() {
                 library, they'll appear here for easy management.
               </p>
               <Button
-                onClick={() => navigate({ to: "/books" })}
+                onClick={() => navigate({ to: "/profile" })}
                 className="flex items-center gap-2"
               >
                 <FaBook className="w-4 h-4" />
