@@ -1,5 +1,6 @@
 import os
-
+import asyncio
+from app.services.notificaciones import notificaciones
 import epaycosdk.epayco as epayco
 
 class EpaycoService:
@@ -17,6 +18,7 @@ class EpaycoService:
             "lenguage": self.lenguage
         }
         self.objepayco = epayco.Epayco(self.options)
+        self.notification_service = notificaciones()
 
     def get_token(self, credit_info: dict):
         """
@@ -59,7 +61,7 @@ class EpaycoService:
             print(f"Error creating client: {e}")
             return {}
         
-    def charge(self, token_card: str, customer_id: str, client: dict, amount: str, bill: str, client_ip: str):
+    def charge(self, token_card: str, customer_id: str, client: dict, amount: str, bill: str, client_ip: str, books_list=None):
         """
         Client information example:
         client = {
@@ -67,6 +69,7 @@ class EpaycoService:
             "full_name": "John Doe",
             "email": "example@email.com",
         }
+        books_list: list of books related to the sale (optional)
         """
         try:
             payment_info = {
@@ -94,7 +97,18 @@ class EpaycoService:
             }
 
             pay = self.objepayco.charge.create(payment_info)
-            # print("Pay created with epayco", pay)
+
+            if pay.get("success"):  # Ajusta según la respuesta de ePayco
+                asyncio.create_task(
+                    self.notification_service.send_sale_notification(
+                        to_email=client["email"],
+                        client_name=client["full_name"],
+                        amount=amount,
+                        bill=bill,
+                        books=books_list
+                    )
+                )
+
             return pay
         except Exception as e:
             print(f"Error processing charge: {e}")
