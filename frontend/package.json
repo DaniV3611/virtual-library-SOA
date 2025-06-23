@@ -51,7 +51,7 @@
     "globals": "^15.15.0",
     "semgrep": "^0.0.1",
     "tw-animate-css": "^1.3.0",
-    "typescript": "~5.7.2",
+    "typescript": "~5.8.3",
     "typescript-eslint": "^8.24.1",
     "vite": "^6.3.5"
   }
